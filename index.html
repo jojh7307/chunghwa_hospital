@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>청화병원 살인사건 — 엔딩 북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        hospital: {
+                            900: '#0b0f19',
+                            800: '#151c2c',
+                            700: '#232d42',
+                            600: '#334155',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .serif-text { font-family: 'Noto Serif KR', serif; }
+        .fade-in { animation: fadeIn 0.35s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media print {
+            body { background: white !important; color: black !important; }
+            header, button, footer { display: none !important; }
+            #result-view { border: none !important; box-shadow: none !important; background: white !important; color: black !important; }
+        }
+    </style>
+</head>
+<body class="bg-hospital-900 text-slate-200 min-h-screen flex flex-col justify-between selection:bg-red-900 selection:text-white">
+
+    <!-- Header -->
+    <header class="border-b border-hospital-700 bg-hospital-800/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-base md:text-lg font-bold text-slate-100 tracking-wider">청화병원 살인사건</h1>
+                <p class="text-xs text-slate-400">엔딩 북 인터랙티브 분기 뷰어 (완전판)</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="btn-back" onclick="goBack()" class="hidden text-xs px-3 py-1.5 bg-hospital-800 hover:bg-hospital-700 rounded-lg text-slate-300 transition border border-hospital-600">
+                    이전으로
+                </button>
+                <button onclick="resetApp()" class="text-xs px-3 py-1.5 bg-hospital-700 hover:bg-hospital-600 rounded-lg text-slate-300 transition border border-hospital-600">
+                    처음으로
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl w-full mx-auto px-4 py-6 flex-grow flex flex-col justify-center">
+
+        <!-- STEP 1: 감염자 선택 -->
+        <div id="step-1" class="step-container fade-in space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Step 1</span>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-100">감염자는 누구인가요?</h2>
+                <p class="text-sm text-slate-400">피부 발진 카드 소지자를 선택하세요.</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <button onclick="setInfected('강태석')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">강태석</div>
+                </button>
+                <button onclick="setInfected('조명수')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">조명수</div>
+                </button>
+                <button onclick="setInfected('오세라')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">오세라</div>
+                </button>
+                <button onclick="setInfected('임정숙')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">임정숙</div>
+                </button>
+                <button onclick="setInfected('백도윤')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">백도윤 <span class="text-xs text-slate-400 font-normal">(6인 전용)</span></div>
+                </button>
+                <button onclick="setInfected('한지훈')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">한지훈</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: 한지훈(집행자)의 행동 선택 -->
+        <div id="step-2" class="step-container hidden fade-in space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Step 2</span>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-100" id="step2-heading">한지훈(집행자)의 행동은 무엇인가요?</h2>
+                <p class="text-sm text-slate-400" id="step2-subheading">총기와 감염 대응 결과를 선택하세요.</p>
+            </div>
+            <div id="han-action-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+        <!-- STEP 2-sub: 타인 사살 대상 선택 -->
+        <div id="step-2-sub" class="step-container hidden fade-in space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Step 2-1</span>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-100">누구를 사살했나요?</h2>
+                <p class="text-sm text-slate-400">집행자 한지훈이 방아쇠를 당겨 쏜 상대를 선택하세요. (본인 제외)</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="shoot-target-grid">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+        <!-- STEP 3: 범인으로 구속된 사람 선택 -->
+        <div id="step-3" class="step-container hidden fade-in space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Step 3</span>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-100">범인으로 구속된 사람은 누구인가요?</h2>
+                <p class="text-sm text-slate-400">최다 득표로 체포된 인물을 선택하세요.</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="suspect-grid">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+        <!-- STEP 4: 보자기 결과 선택 -->
+        <div id="step-4" class="step-container hidden fade-in space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Step 4</span>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-100">감염자가 뽑은 쪽지의 결과는 무엇인가요?</h2>
+                <p class="text-sm text-slate-400">생존한 감염자의 최종 충동 반응을 선택하세요.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onclick="setBojagi('참는다')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">참는다</div>
+                    <div class="text-xs text-slate-400 mt-1">충동을 억제하고 버텨냄</div>
+                </button>
+                <button onclick="setBojagi('문다')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">문다</div>
+                    <div class="text-xs text-slate-400 mt-1">누군가를 물어뜯음</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 4-sub: 물린 사람 선택 -->
+        <div id="step-4-sub" class="step-container hidden fade-in space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Step 4-1</span>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-100">누구를 물었나요?</h2>
+                <p class="text-sm text-slate-400">감염자에게 물린 피해자를 선택하세요.</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="bitten-target-grid">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+        <!-- RESULT VIEW -->
+        <div id="result-view" class="step-container hidden fade-in space-y-6">
+            <div class="bg-hospital-800 border border-hospital-700 rounded-2xl p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-bl-full pointer-events-none"></div>
+                
+                <div class="border-b border-hospital-700 pb-4 flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold text-red-400 uppercase tracking-widest" id="result-group">군 분류</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-100 mt-1" id="result-title">엔딩 제목</h2>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs bg-hospital-700 px-2.5 py-1 rounded-full text-slate-300 font-mono" id="result-code">CODE</span>
+                    </div>
+                </div>
+
+                <!-- Summary Badges -->
+                <div class="bg-hospital-900/60 rounded-xl p-3 text-xs text-slate-400 flex flex-wrap gap-2 items-center" id="result-badges">
+                </div>
+
+                <!-- Ending Body -->
+                <div class="serif-text text-slate-300 leading-relaxed space-y-5 text-base md:text-lg" id="result-body">
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-4 flex flex-wrap gap-3">
+                    <button onclick="resetApp()" class="px-5 py-2.5 bg-hospital-700 hover:bg-hospital-600 rounded-xl text-sm font-medium text-slate-200 transition">
+                        처음부터 다시 시작
+                    </button>
+                    <button onclick="window.print()" class="px-5 py-2.5 bg-red-800 hover:bg-red-700 rounded-xl text-sm font-medium text-white transition shadow-lg shadow-red-900/30">
+                        엔딩 인쇄 / PDF 저장
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-hospital-800 bg-hospital-900 py-4 text-center text-xs text-slate-500">
+        청화병원 살인사건 엔딩 북 가이드 (완전판)
+    </footer>
+
+    <script>
+        const characters = ['강태석', '조명수', '오세라', '임정숙', '백도윤', '한지훈'];
+
+        let state = {
+            infected: null,
+            hanAction: null,
+            shootTarget: null,
+            suspect: null,
+            bojagiResult: null,
+            bittenTarget: null
+        };
+        
+        let stepHistory = ['step-1'];
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step-container').forEach(el => el.classList.add('hidden'));
+            document.getElementById(stepId).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            const backBtn = document.getElementById('btn-back');
+            if (stepHistory.length > 1) {
+                backBtn.classList.remove('hidden');
+            } else {
+                backBtn.classList.add('hidden');
+            }
+        }
+
+        function goBack() {
+            if (stepHistory.length > 1) {
+                stepHistory.pop(); // Remove current step
+                const prevStep = stepHistory[stepHistory.length - 1];
+                
+                // Clear state based on what step we are going back to
+                if (prevStep === 'step-1') state.infected = null;
+                if (prevStep === 'step-2') state.hanAction = null;
+                if (prevStep === 'step-2-sub') state.shootTarget = null;
+                if (prevStep === 'step-3') state.suspect = null;
+                if (prevStep === 'step-4') state.bojagiResult = null;
+                if (prevStep === 'step-4-sub') state.bittenTarget = null;
+
+                showStep(prevStep);
+            }
+        }
+
+        function resetApp() {
+            state = { infected: null, hanAction: null, shootTarget: null, suspect: null, bojagiResult: null, bittenTarget: null };
+            stepHistory = ['step-1'];
+            showStep('step-1');
+        }
+
+        function setInfected(name) {
+            state.infected = name;
+            buildHanActionStep();
+            stepHistory.push('step-2');
+            showStep('step-2');
+        }
+
+        function buildHanActionStep() {
+            const grid = document.getElementById('han-action-grid');
+            const heading = document.getElementById('step2-heading');
+            const subheading = document.getElementById('step2-subheading');
+            grid.innerHTML = '';
+
+            if (state.infected === '한지훈') {
+                heading.textContent = "한지훈(감염자 본인)의 행동은 무엇인가요?";
+                subheading.textContent = "감염된 한지훈의 선택을 선택하세요.";
+                grid.innerHTML = `
+                    <button onclick="setHanAction('자결')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                        <div class="font-semibold text-slate-200 group-hover:text-white">자결함</div>
+                        <div class="text-xs text-slate-400 mt-1">자신을 사살하여 감염을 끝냄</div>
+                    </button>
+                    <button onclick="setHanAction('타인사살')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                        <div class="font-semibold text-slate-200 group-hover:text-white">타인 사살</div>
+                        <div class="text-xs text-slate-400 mt-1">다른 사람을 쏨 (무조건 물기 직행)</div>
+                    </button>
+                    <button onclick="setHanAction('무사살')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group sm:col-span-2">
+                        <div class="font-semibold text-slate-200 group-hover:text-white">무사살 (방아쇠 안 당김)</div>
+                        <div class="text-xs text-slate-400 mt-1">아무도 쏘지 않음</div>
+                    </button>
+                `;
+            } else {
+                heading.textContent = "한지훈(집행자)의 행동은 무엇인가요?";
+                subheading.textContent = "집행자의 총기 사용 결과를 선택하세요.";
+                grid.innerHTML = `
+                    <button onclick="setHanAction('사살됨')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                        <div class="font-semibold text-slate-200 group-hover:text-white">감염자 사살</div>
+                        <div class="text-xs text-slate-400 mt-1">진짜 감염자를 정확히 쏴 죽임</div>
+                    </button>
+                    <button onclick="setHanAction('타인사살')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                        <div class="font-semibold text-slate-200 group-hover:text-white">타인 사살 (오인사살)</div>
+                        <div class="text-xs text-slate-400 mt-1">감염자가 아닌 다른 사람을 쏨</div>
+                    </button>
+                    <button onclick="setHanAction('생존')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group sm:col-span-2">
+                        <div class="font-semibold text-slate-200 group-hover:text-white">사살 안 함 (생존)</div>
+                        <div class="text-xs text-slate-400 mt-1">감염자가 사살되지 않고 살아남음</div>
+                    </button>
+                `;
+            }
+        }
+
+        function setHanAction(action) {
+            state.hanAction = action;
+
+            if (state.infected === '한지훈' && action === '타인사살') {
+                buildShootTargetStep();
+                stepHistory.push('step-2-sub');
+                showStep('step-2-sub');
+            } else if (state.infected !== '한지훈' && action === '타인사살') {
+                buildShootTargetStep();
+                stepHistory.push('step-2-sub');
+                showStep('step-2-sub');
+            } else {
+                buildSuspectStep();
+                stepHistory.push('step-3');
+                showStep('step-3');
+            }
+        }
+
+        function buildShootTargetStep() {
+            const grid = document.getElementById('shoot-target-grid');
+            grid.innerHTML = '';
+            characters.forEach(char => {
+                if (char === '한지훈') return; // 집행자 본인은 사살 대상에서 제외
+                if (char === '백도윤' && state.infected !== '백도윤') {
+                    // 백도윤은 NPC라 예외 처리가 복잡하지만 일단 타겟 가능
+                }
+                grid.innerHTML += `
+                    <button onclick="setShootTarget('${char}')" class="p-3 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 text-slate-200 text-sm font-semibold transition">
+                        ${char} 사살
+                    </button>
+                `;
+            });
+        }
+
+        function setShootTarget(target) {
+            state.shootTarget = target;
+            buildSuspectStep();
+            stepHistory.push('step-3');
+            showStep('step-3');
+        }
+
+        function buildSuspectStep() {
+            const grid = document.getElementById('suspect-grid');
+            grid.innerHTML = '';
+            characters.forEach(char => {
+                if (char === state.shootTarget || (state.hanAction === '사살됨' && char === state.infected) || (state.hanAction === '자결' && char === '한지훈')) return; // 사망자는 체포 불가
+                grid.innerHTML += `
+                    <button onclick="setSuspect('${char}')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
+                        <div class="font-semibold text-slate-200 group-hover:text-white">${char} 구속</div>
+                    </button>
+                `;
+            });
+            grid.innerHTML += `
+                <button onclick="setSuspect('지목 안 됨')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group col-span-2 sm:col-span-3">
+                    <div class="font-semibold text-slate-200 group-hover:text-white">지목 안 됨 / 미해결</div>
+                    <div class="text-xs text-slate-400 mt-1">범인으로 구속된 사람이 없음</div>
+                </button>
+            `;
+        }
+
+        function setSuspect(suspectName) {
+            state.suspect = suspectName;
+
+            // 판정 분기: 보자기(물기) 단계가 필요한지 확인
+            let needsBojagi = false;
+            if (state.infected === '한지훈') {
+                if (state.hanAction === '무사살') needsBojagi = true;
+                if (state.hanAction === '타인사살') needsBojagi = true; // U, V 또는 O, P
+            } else {
+                if (state.hanAction === '생존' || state.hanAction === '타인사살') needsBojagi = true;
+            }
+
+            if (needsBojagi) {
+                stepHistory.push('step-4');
+                showStep('step-4');
+            } else {
+                generateResult();
+            }
+        }
+
+        function setBojagi(result) {
+            state.bojagiResult = result;
+            if (result === '문다') {
+                buildBittenTargetStep();
+                stepHistory.push('step-4-sub');
+                showStep('step-4-sub');
+            } else {
+                generateResult();
+            }
+        }
+
+        function buildBittenTargetStep() {
+            const grid = document.getElementById('bitten-target-grid');
+            grid.innerHTML = '';
+            const bittenList = characters.filter(c => c !== state.infected && c !== state.shootTarget && c !== state.suspect && !(state.hanAction === '사살됨' && c === state.infected) && !(state.hanAction === '자결' && c === '한지훈'));
+            bittenList.forEach(char => {
+                grid.innerHTML += `
+                    <button onclick="setBittenTarget('${char}')" class="p-3 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 text-slate-200 text-sm font-semibold transition">
+                        ${char} 물림
+                    </button>
+                `;
+            });
+        }
+
+        function setBittenTarget(target) {
+            state.bittenTarget = target;
+            generateResult();
+        }
+
+        // --- 엔딩 조합 및 부록 반영 엔진 ---
+        function generateResult() {
+            stepHistory.push('result-view');
+            showStep('result-view');
+
+            let endingCode = "";
+            let endingTitle = "";
+            let groupName = "";
+            let paragraphs = [];
+
+            const isTaeseokVoted = (state.suspect === '강태석');
+            const isNotVoted = (state.suspect === '지목 안 됨');
+            const isWrongSuspect = (!isTaeseokVoted && !isNotVoted);
+            const isC4Condition = (isWrongSuspect && state.suspect === state.infected && state.infected !== '강태석');
+
+            // Ⅰ군: 강태석 감염
+            if (state.infected === '강태석') {
+                groupName = "Ⅰ군 · 감염자가 강태석인 경우";
+                if (state.hanAction === '사살됨') {
+                    if (isTaeseokVoted) {
+                        endingCode = "A"; endingTitle = "진실의 대가"; paragraphs = getEndingText('A');
+                    } else {
+                        endingCode = "G"; endingTitle = "총성 뒤의 침묵"; paragraphs = getEndingText('G');
+                        if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                    }
+                } else if (state.hanAction === '타인사살') {
+                    if (isTaeseokVoted) {
+                        endingCode = "B"; endingTitle = "경찰차 안의 침묵"; paragraphs = getEndingText('B');
+                    } else {
+                        endingCode = "H"; endingTitle = "돌아가는 길"; paragraphs = getEndingText('H');
+                        if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                    }
+                    injectAppendixC1(paragraphs, state.shootTarget, state.shootTarget === '강태석');
+                    if (state.bojagiResult === '문다') injectAppendixB(paragraphs, state.bittenTarget);
+                } else { // 생존 (사살 안 함)
+                    if (isTaeseokVoted) {
+                        if (state.bojagiResult === '참는다') {
+                            endingCode = "B"; endingTitle = "경찰차 안의 침묵"; paragraphs = getEndingText('B');
+                        } else {
+                            endingCode = "C"; endingTitle = "세상에 남겨진 증오"; paragraphs = getEndingText('C');
+                            injectAppendixB(paragraphs, state.bittenTarget);
+                        }
+                    } else { 
+                        if (state.bojagiResult === '참는다') {
+                            endingCode = "H"; endingTitle = "돌아가는 길"; paragraphs = getEndingText('H');
+                        } else {
+                            endingCode = "I"; endingTitle = "아무도 대신할 수 없는 복수"; paragraphs = getEndingText('I');
+                            injectAppendixB(paragraphs, state.bittenTarget);
+                        }
+                        if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                    }
+                }
+            } 
+            // Ⅱ군: 강태석·한지훈이 아닌 감염자
+            else if (state.infected !== '한지훈') {
+                groupName = `Ⅱ군 · 감염자가 ${state.infected}인 경우`;
+
+                if (state.hanAction === '사살됨') {
+                    if (isTaeseokVoted) {
+                        endingCode = "D"; endingTitle = "멈춰 선 재앙"; paragraphs = getEndingText('D');
+                    } else {
+                        endingCode = "J"; endingTitle = "살아남은 자의 의심"; paragraphs = getEndingText('J');
+                        if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                    }
+                    injectAppendixA(paragraphs, state.infected, '사살', endingCode);
+                } else if (state.hanAction === '타인사살') {
+                    if (isTaeseokVoted) {
+                        endingCode = "E"; endingTitle = "끝나지 않은 두려움"; paragraphs = getEndingText('E');
+                    } else {
+                        endingCode = "K"; endingTitle = "마지막까지 사람으로 남는 일"; paragraphs = getEndingText('K');
+                        if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                    }
+                    injectAppendixA(paragraphs, state.infected, '참음', endingCode);
+                    injectAppendixC1(paragraphs, state.shootTarget, state.shootTarget === '강태석');
+                } else { // 생존 (사살 안 함)
+                    if (state.bojagiResult === '참는다') {
+                        if (isTaeseokVoted) {
+                            endingCode = "E"; endingTitle = "끝나지 않은 두려움"; paragraphs = getEndingText('E');
+                        } else {
+                            endingCode = "K"; endingTitle = "마지막까지 사람으로 남는 일"; paragraphs = getEndingText('K');
+                            if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                        }
+                        
+                        if (isC4Condition) injectAppendixC4(paragraphs, '참음');
+                        else injectAppendixA(paragraphs, state.infected, '참음', endingCode);
+                        
+                    } else { // 물음
+                        if (isTaeseokVoted) {
+                            endingCode = "F"; endingTitle = "무너진 경계"; paragraphs = getEndingText('F');
+                        } else {
+                            endingCode = "L"; endingTitle = "물린 사람의 얼굴"; paragraphs = getEndingText('L');
+                            if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                        }
+                        
+                        if (isC4Condition) {
+                            injectAppendixC4(paragraphs, '물음');
+                        } else {
+                            injectAppendixA(paragraphs, state.infected, '물음', endingCode);
+                            injectAppendixB(paragraphs, state.bittenTarget);
+                        }
+                    }
+                }
+            } 
+            // Ⅲ군: 한지훈 감염
+            else {
+                groupName = "Ⅲ군 · 감염자가 한지훈인 경우";
+
+                if (state.hanAction === '자결') {
+                    if (isTaeseokVoted) {
+                        endingCode = "M"; endingTitle = "방아쇠를 당긴 손"; paragraphs = getEndingText('M');
+                    } else {
+                        endingCode = "N"; endingTitle = "아무도 모르는 마지막 선택"; paragraphs = getEndingText('N');
+                        if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                    }
+                } else if (state.hanAction === '타인사살') {
+                    if (isTaeseokVoted) {
+                        endingCode = "O"; endingTitle = "손에 남은 무게"; paragraphs = getEndingText('O');
+                    } else {
+                        endingCode = "P"; endingTitle = "돌아갈 수 없는 선"; paragraphs = getEndingText('P');
+                        if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                    }
+                    injectAppendixC1(paragraphs, state.shootTarget, state.shootTarget === '강태석');
+                    injectAppendixB(paragraphs, state.bittenTarget);
+                } else { // 무사살
+                    if (state.bojagiResult === '참는다') {
+                        if (isTaeseokVoted) {
+                            endingCode = "Q"; endingTitle = "끝까지 붙잡은 마음"; paragraphs = getEndingText('Q');
+                        } else {
+                            endingCode = "S"; endingTitle = "방아쇠를 당기지 않은 밤"; paragraphs = getEndingText('S');
+                            if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                        }
+                    } else { // 물음
+                        if (isTaeseokVoted) {
+                            endingCode = "R"; endingTitle = "두려움이 남긴 흔적"; paragraphs = getEndingText('R');
+                        } else {
+                            endingCode = "T"; endingTitle = "끝내 무너진 약속"; paragraphs = getEndingText('T');
+                            if (isWrongSuspect) injectAppendixC3(paragraphs, state.suspect);
+                        }
+                        injectAppendixB(paragraphs, state.bittenTarget);
+                    }
+                }
+            }
+
+            // UI 렌더링
+            document.getElementById('result-group').textContent = groupName;
+            document.getElementById('result-title').textContent = `${endingCode}. ${endingTitle}`;
+            document.getElementById('result-code').textContent = `ENDING CODE: ${endingCode}`;
+
+            let badgesHTML = `
+                <span class="bg-hospital-800 px-2.5 py-1 rounded-md text-slate-300">감염자: ${state.infected}</span>
+                <span class="bg-hospital-800 px-2.5 py-1 rounded-md text-slate-300">구속자: ${state.suspect}</span>
+            `;
+            if (state.shootTarget) badgesHTML += `<span class="bg-hospital-800 px-2.5 py-1 rounded-md text-red-400">사살 대상: ${state.shootTarget}</span>`;
+            if (isC4Condition && state.bojagiResult === '문다') {
+                badgesHTML += `<span class="bg-hospital-800 px-2.5 py-1 rounded-md text-red-400">물린 사람: 경찰관</span>`;
+            } else if (state.bittenTarget) {
+                badgesHTML += `<span class="bg-hospital-800 px-2.5 py-1 rounded-md text-red-400">물린 사람: ${state.bittenTarget}</span>`;
+            }
+            document.getElementById('result-badges').innerHTML = badgesHTML;
+
+            // 문자열 치환 및 단락 렌더링
+            let bodyHTML = paragraphs.map(p => {
+                let formattedP = p
+                    .replace(/\[물린 사람\]/g, state.bittenTarget || '피해자')
+                    .replace(/〔물린 사람〕/g, state.bittenTarget || '피해자')
+                    .replace(/\[사살된 사람\]/g, state.shootTarget || '희생자')
+                    .replace(/〔사살된 사람〕/g, state.shootTarget || '희생자')
+                    .replace(/\[구속된 사람\]/g, state.suspect || '용의자')
+                    .replace(/〔구속된 사람〕/g, state.suspect || '용의자');
+                return `<p>${formattedP}</p>`;
+            }).join('');
+
+            document.getElementById('result-body').innerHTML = bodyHTML;
+            document.getElementById('appendix-box').classList.add('hidden'); // 우리는 본문에 합쳤으므로 부록 박스 숨김
+        }
+
+        // --- 부록 주입 헬퍼 함수 (배열 직접 수정) ---
+        function injectAppendixA(paragraphs, charName, type, endingCode) {
+            const data = {
+                '조명수': {
+                    '사살': "총성이 울렸을 때 조명수는 자신이 무엇을 잃는지 계산하려 했다. 늘 그래 왔듯이. 그러나 숫자는 떠오르지 않았다. 12년 동안 장부를 맞춰 온 사람이 마지막으로 남긴 것은 뒤늦게 시작된 한 번의 떨림이었다. 꼬리를 자르기 위해 만들어 둔 메모도, 숨겨 둔 이중 장부도 이제는 아무 값을 갖지 못했다.",
+                    '참음': "조명수는 사람들에게서 멀찍이 떨어져 소매로 입을 가렸다. 협상 테이블에서라면 무엇이든 거래할 수 있던 남자가 처음으로 내놓을 것이 하나도 없는 처지가 되어 있었다. 그는 이를 악물었다. 한 아이를 조용히 사라져도 되는 사람으로 골랐던 그 손으로, 이번에는 누구도 건드리지 않기 위해 제 팔을 붙들었다.",
+                    '물음': "조명수는 가장 가까이 있던 [물린 사람]의 팔을 물었다. 계산도 협상도 없었다. 평생 손해를 피해 살아온 남자가 처음으로 자기 몫의 손해를 남에게 떠넘겼다. 사람들이 비명을 지르며 그를 떼어 낼 때도 그의 눈은 초점을 잃은 채 비어 있었다."
+                },
+                '오세라': {
+                    '사살': "오세라는 쓰러지는 순간까지 무언가 말하려는 듯 입술을 움직였다. 모르는 척했을 뿐이라고, 문제를 제기하는 순간 모든 게 끊긴다는 걸 알았다고. 그러나 변명은 끝내 소리가 되지 못했다. 한 번 잡은 거래처는 놓치지 않는다던 사람이, 이 밤 처음으로 놓쳐 버린 것은 자기 자신이었다.",
+                    '참음': "오세라는 벽 쪽으로 물러서며 손바닥을 내밀었다. 다가오지 마요, 제발. 늘 시원시원하던 목소리가 갈라져 나왔다. 영업하는 사람답게 그녀는 이 순간에도 계산했다. 지금 가장 큰 손실이 무엇인지를. 그리고 처음으로 실적도 회사도 아닌 다른 사람의 목숨을 그 계산의 맨 위에 올렸다.",
+                    '물음': "오세라는 웃는 얼굴로 다가가던 사람이었다. 그러나 이번에는 웃지 않았다. 그녀는 [물린 사람]에게 다가가 그 팔을 물었다. 모르는 척하며 지나온 모든 것들이 이 순간 한꺼번에 입을 벌린 것 같았다."
+                },
+                '임정숙': {
+                    '사살': "임정숙은 총성이 울린 뒤에도 한참을 움직이지 않았다. 28년 동안 환자를 살리는 일로 살아온 사람이 눈앞에서 한 생명이 꺼지는 것을 보았다. 그녀는 서연의 인계장을 구겨질 만큼 쥐고 있었다. 이번에도 자신은 지켜보기만 했다는 생각이, 말이 되지 못한 채 목에 걸렸다.",
+                    '참음': "임정숙은 스스로 병실 구석으로 가 등을 돌리고 앉았다. 환자를 격리할 때 하던 대로, 누구보다 먼저 자신을 격리했다. 말수가 적은 사람답게 그녀는 한마디 부탁도 하지 않았다. 다만 두 손을 무릎 위에 포개고, 서연을 못 본 척했던 그날 아침을 떠올리며 이번에는 끝까지 버텼다.",
+                    '물음': "임정숙은 간호사로 평생을 살며 단 한 번도 사람의 몸에 해를 입히려 한 적이 없었다. 그런 손이 [물린 사람]의 팔을 붙들었다. 사람들이 그녀의 이름을 불렀지만 그 눈은 이미 그들이 알던 수간호사의 눈이 아니었다."
+                },
+                '백도윤': {
+                    '사살': "백도윤은 총구 앞에서 끝까지 자신이 왜 그 자리에 서 있는지 이해하지 못한 얼굴이었다. 평생 아버지에게 인정받으려 애써 온 아들이, 아버지가 지하에 감춰 둔 것에 쓰러졌다. 그가 마지막까지 갚지 못한 것은 빚만이 아니었다.",
+                    '참음': "백도윤은 두 손으로 자기 입을 틀어막았다. 눈치를 보는 데 익숙한 사람이었지만 이번에는 누구의 눈치도 아닌, 자기 안의 무언가와 싸우고 있었다. 아버지에게서 한 번도 듣지 못한 인정 같은 것은 이제 필요하지 않았다. 그는 그저 누구도 다치지 않기를 바랐다.",
+                    '물음': "백도윤은 사람들에게 둘러싸인 채 한 걸음씩 물러나다가 [물린 사람]의 팔을 물었다. 아버지의 병원도, 아버지의 재산도, 아버지의 비밀도 결국 그에게 남긴 것은 이 지옥뿐이었다."
+                }
+            };
+            
+            if (!data[charName]) return;
+            const replacementText = data[charName][type];
+            
+            if (type === '사살') {
+                const targetIdx = paragraphs.findIndex(p => p.includes("그때 총성이 울렸다") || p.includes("감염자를 향한 총성이 울리자"));
+                if (targetIdx !== -1) paragraphs[targetIdx] = replacementText;
+            } else if (type === '참음') {
+                const targetIdx = paragraphs.findIndex(p => p.includes("한편 감염자는 아직 살아 있었다") || p.includes("그때 감염자가 사람들 앞에 모습을 드러냈다"));
+                if (targetIdx !== -1) {
+                    paragraphs[targetIdx] = replacementText;
+                    if (endingCode === 'K' && targetIdx + 1 < paragraphs.length) {
+                        paragraphs.splice(targetIdx + 1, 1); // K 엔딩의 경우 "위 두 문단" 교체
+                    }
+                }
+            } else if (type === '물음') {
+                const targetIdx = paragraphs.findIndex(p => p.includes("감염자가 〔물린 사람〕의 몸을 물고 있었다") || p.includes("감염자가 〔물린 사람〕을 물었을 때"));
+                if (targetIdx !== -1) paragraphs[targetIdx] = replacementText;
+            }
+        }
+
+        function injectAppendixB(paragraphs, target) {
+            let bText = "";
+            if (target === '강태석') bText = "마스크 너머로 강태석은 자기 팔의 상처를 담담히 내려다보았다. 딸이 겪은 일을 자신도 겪게 되었다는 사실이, 이상하게도 낯설지 않았다.";
+            else if (target === '조명수') bText = "숫자로 환산할 수 없는 손실이 처음으로 그의 몸에 새겨졌다.";
+            else if (target === '오세라') bText = "거래처를 떠올리듯 가능한 선택지를 하나하나 헤아려 보았지만, 어느 항목에도 답은 없었다.";
+            else if (target === '한지훈') bText = "누구보다 이 병을 잘 아는 사람이 가장 먼저 자기 상처의 의미를 이해했다. 그는 아무 말 없이 지유의 얼굴을 떠올렸다.";
+            else if (target === '임정숙') bText = "상처를 압박하는 손길은 몸에 밴 간호사의 것이었지만, 손끝의 떨림까지는 숨기지 못했다.";
+            else if (target === '백도윤') bText = "한참 동안 그는 자신에게 무슨 일이 일어났는지 이해하지 못한 채 서 있었다.";
+            else return;
+
+            // 물기 장면이나 그 직후 사람들의 반응을 묘사하는 문단 끝에 추가
+            const insertIdx = paragraphs.findIndex(p => p.includes("물린 사람은 몸부림쳤고") || p.includes("물린 사람은 자신에게 무슨 일이 일어났는지 이해하려 애썼다") || p.includes("물린 사람의 팔을 붙들었다") || p.includes("지옥뿐이었다") || p.includes("초점을 잃은 채 비어 있었다") || p.includes("입을 벌린 것 같았다"));
+            
+            if (insertIdx !== -1) {
+                paragraphs[insertIdx] += " " + bText;
+            } else {
+                // 대체 위치 (보통 중간 이후 문단)
+                paragraphs.splice(paragraphs.length - 2, 0, bText);
+            }
+        }
+
+        function injectAppendixC1(paragraphs, target, isTaeseokTarget) {
+            let text = `총성은 한 번이었다. 그러나 쓰러진 것은 감염자가 아니었다. [사살된 사람]은 아무도 물지 않았고, 아무도 해치지 않은 사람이었다. 한지훈이 방아쇠를 당긴 순간 위험은 사라진 것이 아니라 보이지 않는 곳으로 옮겨 갔을 뿐이었다. 감염의 원인은 여전히 사람들 사이에 있었다. 확신이 얼마나 쉽게 한 사람을 죽일 수 있는지, 그들은 그제야 깨달았다.`;
+            if (isTaeseokTarget) {
+                text += ` 쓰러진 사람이 강태석이었다는 사실이 이 밤을 더 기묘하게 만들었다. 진범은 감염자의 총알이 아니라 오해의 총알에 쓰러졌다. 그를 법정에 세울 기회는 사라졌고, 서연에게 무슨 일이 있었는지 말해 줄 입도 함께 닫혔다.`;
+                
+                // 강태석 생존 암시 문장 삭제
+                for (let i = 0; i < paragraphs.length; i++) {
+                    paragraphs[i] = paragraphs[i].replace(/강태석은 자신의 죄를 감춘 채 살아남았고, /g, '');
+                    paragraphs[i] = paragraphs[i].replace(/강태석은 자신의 죄를 숨긴 채 살아남았고, /g, '');
+                    paragraphs[i] = paragraphs[i].replace(/강태석은 아무도 모르는 곳에서 자신의 죄를 안은 채 살아남았고, /g, '');
+                    paragraphs[i] = paragraphs[i].replace(/강태석은 자신의 죄를 숨긴 채 아침을 맞았고, /g, '');
+                }
+            }
+            // 마지막 문단 바로 앞에 삽입
+            paragraphs.splice(paragraphs.length - 1, 0, text);
+        }
+
+        function injectAppendixC3(paragraphs, suspectName) {
+            let text = `범인으로 지목된 사람은 [구속된 사람]이었다. 수갑이 채워지는 동안 그는 억울함을 호소했지만 아무도 그 말을 끝까지 듣지 않았다. 진짜 범인은 사람들 사이에서 조용히 그 장면을 보고 있었다. 정의가 이루어진 듯 보였지만, 한 사람의 섣부른 확신이 다른 사람의 삶을 가져갔다.`;
+            paragraphs.splice(paragraphs.length - 1, 0, text);
+            
+            // "회장의 죽음은 미해결로 남았다" 치환
+            for (let i = 0; i < paragraphs.length; i++) {
+                paragraphs[i] = paragraphs[i].replace(/회장의 죽음은 미해결로 남았다/g, "회장의 죽음은 끝난 것으로 처리되었다");
+                paragraphs[i] = paragraphs[i].replace(/회장의 죽음은 미해결이었다/g, "회장의 죽음은 끝난 것으로 처리되었다");
+            }
+        }
+
+        function injectAppendixC4(paragraphs, type) {
+            if (type === '물음') {
+                const targetIdx = paragraphs.findIndex(p => p.includes("감염자가 〔물린 사람〕의 몸을 물고 있었다") || p.includes("감염자가 〔물린 사람〕을 물었을 때"));
+                if (targetIdx !== -1) {
+                    paragraphs[targetIdx] = "구속된 사람이 감염자라는 것을 아는 이는 없었다. 경찰차 뒷좌석에서 감염자가 몸을 떨었다. 문이 닫히고 경찰관이 고개를 돌린 순간, 비명이 터졌다. 병원 안의 밤이 끝났다고 믿었던 사람들은 새벽 도로 위에서 그것이 시작이었음을 알게 되었다.";
+                }
+            } else {
+                const targetIdx = paragraphs.findIndex(p => p.includes("한편 감염자는 아직 살아 있었다") || p.includes("그때 감염자가 사람들 앞에 모습을 드러냈다"));
+                if (targetIdx !== -1) {
+                    paragraphs[targetIdx] = "감염자는 차창에 이마를 기댄 채 끝까지 숨을 죽였다. 경찰관은 아무것도 몰랐다. 병원에 남은 사람들도 몰랐다. 잘못 지목되어 갇힌 사람이 사실은 마지막까지 사람으로 남으려 애쓴 사람이었다는 것을 아는 이는 아무도 없었다.";
+                    if (targetIdx + 1 < paragraphs.length && (paragraphs[targetIdx+1].includes("사람들은 쉽게 다가가지 못했다"))) {
+                        paragraphs.splice(targetIdx + 1, 1);
+                    }
+                }
+            }
+        }
+
+        // --- 22편 엔딩 본문 데이터베이스 (배열 반환) ---
+        function getEndingText(code) {
+            const rawTexts = {
+                'A': `강태석은 자신을 향한 시선들을 피하지 않았다. 분노로 일그러진 얼굴이 있었고, 믿을 수 없다는 듯 고개를 젓는 얼굴도 있었다. 그러나 그 가운데 누구도 그가 무엇을 잃었는지는 알지 못했다. 그들에게 그는 회장을 죽인 살인범이었다. 그에게 회장은, 딸을 죽음으로 내몬 수많은 이름 중 하나였을 뿐이다.
+서연은 버텼다. 선배들의 태움을 견뎠고, 맡은 일을 해냈고, 환자 앞에서는 끝내 웃음을 잃지 않았다. 그러다 실험체가 되어 죽었고, 그 죽음은 숙직실의 약물 사고라는 한 줄로 기록에서 지워졌다. 유골함만 남은 딸을 마주하던 날부터 그는 자신이 믿어 온 세상이 얼마나 잔인한 곳인지 알았다. 딸이 없는 세상에서 무엇을 지켜야 하는지, 누구를 용서해야 하는지, 더는 알 수 없었다.
+총성이 울렸다. 감염된 몸이 힘없이 무너졌고, 얼굴에 끝까지 남아 있던 적의가 그제야 풀렸다. 그가 마지막까지 품고 있던 것이 후회였는지 안도였는지, 이제는 누구도 물을 수 없었다. 그의 숨과 함께 감염도 멈췄다. 적어도 그 순간만큼은, 더는 누구도 물려 죽지 않을 것이었다.
+그러나 병원에 남은 사람들은 안도할 수 없었다. 임정숙은 서연의 인계장 원본을 쥔 채 한참을 서 있었다. 조명수는 숫자로 환산되지 않는 것 앞에서 처음으로 입을 열지 못했다. 한지훈은 아직 뜨거운 총구를 내려다보며, 1년 전의 침묵이 이 밤에 어떤 값으로 돌아왔는지를 헤아렸다. 총알 한 발로 모든 죄를 끝낼 수 있었다면 얼마나 편했을까. 하지만 그들은 알고 있었다. 한 사람을 범인으로 지목하고 처벌하는 일과, 그가 왜 그런 사람이 되었는지를 마주하는 일은 전혀 다르다는 것을.
+그날 밤, 청화병원에는 살아남은 사람들이 있었다. 그리고 그들이 평생 외면할 수 없게 된 진실이 있었다.`,
+
+                'B': `강태석의 이름이 불리자 방 안의 공기가 가라앉았다. 그는 변명하지 않았다. 손목에 수갑이 채워지는 동안에도, 회장을 죽인 일을 후회하느냐는 물음 앞에서도 끝내 입을 열지 않았다. 마스크 너머로 조용히 숨을 고르는 모습은, 매일 저녁 일곱 시에 시계처럼 산책을 나서던 그 환자의 얼굴 그대로였다.
+경찰차의 뒷좌석은 좁고 어두웠다. 창밖으로 청화병원의 불빛이 멀어졌다. 몸속에서 무언가가 천천히 끓어오르는 것을 그는 알고 있었다. 가려움은 열이 되었고, 열은 낯선 허기가 되었다. 옆자리의 경찰관이 무전기에 대고 무어라 말하는 동안, 그 목덜미에서 뛰는 맥박이 자꾸 눈에 들어왔다.
+그는 딸을 떠올렸다. 간호사 국가고시 합격증을 내밀며 웃던 얼굴을. 아픈 사람 앞에서는 힘든 내색 한 번 하지 않던 아이를. 서연이 지금 이 자리에 있었다면 무어라 했을까. 사람 곁을 지키려고 그 일을 택한 아이가, 아버지가 사람을 문다는 사실을 견딜 수 있었을까.
+세상을 향한 증오는 여전히 그의 안에 있었다. 그러나 그 증오가 마지막 한 걸음까지 그를 밀어 가지는 못했다. 강태석은 이를 악문 채 고개를 돌렸고, 차창에 이마를 기댄 채 오래도록 숨을 죽였다. 경찰관은 끝내 아무것도 알지 못했다.
+범인은 잡혔다. 병원에 남은 사람들은 그제야 긴 숨을 내쉬었지만, 임정숙은 인계장을 쥔 채 오래도록 말이 없었다. 살인자와 아버지가 한 사람이라는 사실을, 사람들은 쉽게 하나의 이름으로 정리하지 못했다. 감염자 한 명이 병원 밖으로 나갔다는 사실을 아는 이는 아직 없었다. 그는 끝까지 사람으로 남았다. 오직 한 번, 아무도 보지 않는 곳에서.`,
+
+                'C': `쏟아지는 비난 속에서 강태석은 이상할 만큼 조용했다. 자신의 이름이 불리고 자신이 저지른 일이 하나씩 드러나는 동안에도 변명하지 않았다. 회장을 죽인 일을 후회하느냐고 물었다면 그는 대답하지 않았을 것이다. 그렇다고 아무것도 남지 않은 것은 아니었다. 그의 안에는 오래전에 무너진 마음과, 그 잔해 위에서 자라난 증오가 있었다.
+딸의 부고를 받던 날을 그는 잊지 못했다. 서연은 괴롭힘 속에서도 버텼고, 살아 보려 애썼다. 그런데 병원은 그 아이를 지켜 주지 않았다. 실험체로 삼았고, 죽은 뒤에는 그 사실마저 덮었다. 세상은 서연이 어떤 고통을 겪었는지 알려 하지 않았고, 다음 날에도 아무 일 없다는 듯 밝았다. 그에게 그 평범함은 용서할 수 없는 잔인함이었다.
+수갑을 찬 채 경찰차에 오를 때, 젊은 경찰관이 문을 닫았다. 얼굴에는 긴장과 약간의 연민이 섞여 있었다. 강태석은 그 얼굴에서 구원도 용서도 찾지 않았다. 딸을 잃고도 아무렇지 않게 굴러가는 세상을 위해 참아야 할 이유를, 그는 이미 잃은 사람이었다.
+그가 경찰관의 목을 문 것은 충동이 아니라 선택이었다. 비명이 좁은 차 안을 채우고 무전기가 울렸다. 그 소리가 병원 앞마당에 닿았을 때, 남은 사람들은 방금 전까지 자신들이 무엇을 두려워하고 있었는지조차 잊었다.
+범인은 잡혔다. 그러나 그가 세상을 향해 품었던 증오는 그와 함께 갇히지 않았다. 그것은 병원 밖으로, 새벽의 도시로, 서로를 의심하는 눈빛 속으로 번져 갔다.`,
+
+                'D': `강태석의 이름이 불리자, 사람들 사이에서 무언가 무너지는 소리가 났다. 각자 붙들고 있던 의심과 추측이 마침내 하나의 얼굴을 향했다. 회장을 죽인 사람을 알게 되었다고 마음이 편해지는 것은 아니었다. 진실에 가까워질수록 그들이 알지 못했던 것이 얼마나 많았는지만 선명해졌다.
+강태석은 자신을 둘러싼 얼굴들을 바라보았다. 그들은 그가 왜 회장을 죽였는지 알고 싶어 했지만, 이유를 듣는다고 그를 이해할 수 있을지는 누구도 장담하지 못했다. 서연이 태움에 시달렸다는 것, 실험체로 쓰여 죽었다는 것, 그 죽음이 감춰졌다는 것. 그것은 한 사람의 분노만으로 설명되는 일이 아니었다. 강태석은 회장을 죽였다. 그러나 그를 이 자리까지 몰아온 세상은 그보다 훨씬 오래전부터 거기에 있었다.
+그때 총성이 울렸다. 한지훈이 방아쇠를 당긴 자리에서 감염자가 쓰러졌고, 서로를 다급히 부르던 목소리들이 하나둘 잦아들었다. 누군가는 무릎을 꿇은 채 숨을 몰아쉬었고, 누군가는 두 손으로 얼굴을 가렸다. 방금 전까지 눈앞에 있던 죽음이 멈췄다는 사실이 믿기지 않았다.
+안도는 늦게 왔다. 살아남았다는 기쁨보다, 자신이 정말 살아 있는지 확인하려는 마음이 먼저였다. 서로의 얼굴과 손을 살폈고, 작은 기침에도 몸이 굳었다. 누군가는 총을 쏜 사람을 원망했고, 누군가는 그 총성이 없었다면 자신이 죽었을 거라는 사실에 고개를 떨궜다.
+강태석은 그 모습을 지켜보았다. 감염은 멈췄지만 그가 저지른 살인은 남았다. 서연의 죽음도 남았다. 사람들은 이제 두 가지 진실을 한꺼번에 마주해야 했다. 강태석이 살인자라는 사실, 그리고 그를 복수로 이끈 비극이 결코 아무것도 아닌 일이 아니라는 사실을.
+청화병원은 그 밤을 넘겼다. 그러나 살아남았다는 사실만으로 모두가 구원받은 것은 아니었다. 어떤 이에게 생존은 다행이었고, 어떤 이에게는 앞으로 살아가야 한다는 것이 새로운 벌처럼 느껴졌다.`,
+
+                'E': `강태석의 범행이 드러난 순간, 사람들은 비로소 하나의 의문에 답을 얻었다. 그러나 그 답은 누구에게도 평온을 주지 못했다. 회장의 죽음은 우연도 사고도 아니었다. 누군가 계획했고, 결심했고, 실제로 그를 죽였다. 그 사람이 강태석이라는 사실이 밝혀졌지만, 이름 하나로 모든 것이 설명되지는 않았다.
+그에게는 딸이 있었다. 병원에서 괴롭힘을 당하면서도 버텼고, 끝내 실험체가 되어 죽은 아이. 병원은 그 죽음을 감췄고, 아버지는 가장 사랑한 사람을 잃은 뒤 그 죽음을 아무렇지 않게 덮은 세상을 증오하게 되었다. 그의 선택을 정당화할 수는 없었다. 그러나 그가 느낀 절망까지 거짓이라고 말할 수도 없었다. 남은 사람들은 그 두 사실 사이에서 쉽게 결론을 내리지 못했다.
+한편 감염자는 아직 살아 있었다. 그는 사람들에게서 멀찍이 떨어져 서서 제발 다가오지 말라고 애원했다. 목소리는 떨렸고 눈에는 두려움이 가득했다. 자신이 무엇을 할 수 있는지 그는 알고 있었다. 누군가를 문다면, 그 사람의 삶도 끝없는 공포 속으로 밀어 넣게 될 것이다. 그래서 그는 이를 악물었다. 지금껏 살아남기 위해 붙들어 온 모든 것을 끌어모아, 단 한 번만이라도 더는 누구도 다치지 않게 하려 했다.
+사람들은 그를 믿어야 할지 알지 못했다. 가까이 다가가 손을 내밀고 싶다가도, 그 손이 물릴까 두려워 멈췄다. 감염자는 그 망설임을 보며 고개를 숙였다. 두려워하는 것이 당연하다는 걸 알면서도 그 시선은 견디기 어려웠다. 그는 괴물이 되고 싶지 않았다. 다만 끝까지 사람으로 남을 수 있을지 확신할 수 없었다.
+그 밤은 끝났지만 두려움은 남았다. 감염자는 아직 누구도 물지 않았고, 그렇다고 위협이 사라진 것도 아니었다. 병원 문은 열려 있었다. 그러나 감염자를 그 문밖으로 내보내도 되는지, 아무도 답하지 못했다. 안도와 불안이 한 사람을 사이에 두고 마주 서 있었다.
+강태석의 범행을 밝힌 일도, 감염자의 선의를 믿어 보려는 일도 완전한 해결은 아니었다. 그들은 그저 더 나쁜 일이 벌어지지 않기를 바라며, 아직 끝나지 않은 밤의 끝을 기다리고 있었다.`,
+
+                'F': `진실이 밝혀진 뒤에도 사람들은 한동안 강태석에게서 눈을 떼지 못했다. 회장을 죽인 것은 분명 그였다. 그러나 그가 왜 그런 선택을 했는지 알고 난 뒤에는, 누구도 그를 단순한 미치광이 살인자라 부르기 어려웠다. 딸을 잃은 아버지의 슬픔은 진짜였고, 그 슬픔을 낳은 병원의 죄도 진짜였다. 그렇다고 그가 저지른 살인이 사라지지는 않았다. 사람들은 그 모순을 견디지 못한 채 저마다 다른 쪽으로 고개를 돌렸다.
+수갑을 찬 강태석은 그들의 표정을 보며 자신이 무엇을 기대했는지 되짚었다. 누군가 이야기를 듣고 함께 울어 주기를 바랐던 걸까. 아니면 자신이 겪은 고통을 세상도 똑같이 겪기를 바랐던 걸까. 서연이 떠난 뒤로 그는 두 마음을 구분하지 못했다. 딸이 살아 있던 시절에는 힘들어도 버틸 만한 세상이었다. 이제 그 이유는 사라졌고, 남은 것은 딸의 죽음을 숨긴 이들과 그 사실을 알고도 침묵하는 세상에 대한 증오뿐이었다.
+그때 누군가 비명을 질렀다.
+감염자가 〔물린 사람〕의 몸을 물고 있었다. 처음에는 모두가 상황을 이해하지 못했다. 도우려는 몸짓인지, 막으려는 행동인지, 이미 늦은 뒤에야 사람들은 그 광경의 의미를 알아차렸다. 물린 사람은 몸부림쳤고, 사람들이 둘을 떼어 놓으려 달려들었다. 공포는 눈 깜짝할 사이에 방 안을 채웠다.
+감염자는 뒤로 물러나 자신이 저지른 일을 바라보았다. 조금 전까지 같은 공간에서 숨 쉬고, 같은 말을 나누고, 살아남기를 바라던 사람이었다. 이제 그가 남긴 것은 상처와 공포였다. 물린 사람의 얼굴에 번지는 절망을 보면서도, 이미 일어난 일을 되돌릴 방법은 없었다.
+누군가는 그를 죽여야 한다고 외쳤고, 누군가는 아직 늦지 않았을지도 모른다며 붙들었다. 서로를 향해 쏟아지는 말 속에서 누구도 확신하지 못했다. 한 사람을 살리려는 선택이 다른 사람을 위험에 빠뜨릴 수도 있었다. 무엇이 옳은지 따질 시간조차 모자랐다.
+강태석의 범행과 감염자의 선택은 서로 다른 일이었지만, 살아남은 사람들에게 남긴 질문은 닮아 있었다. 인간은 어디까지 무너질 수 있는가. 그리고 누군가를 이해하려는 마음은 언제까지 다른 사람을 지키는 일과 함께할 수 있는가. 그 밤이 끝난 뒤에도 누구도 그 질문에 쉽게 답하지 못했다.`,
+
+                'G': `강태석을 향한 의심은 끝내 확신이 되지 못했다. 사람들은 저마다 본 것과 들은 것을 꺼내 놓았지만, 조각들은 마지막 순간까지 하나의 그림으로 맞춰지지 않았다. 누군가는 자신이 옳았다고 믿었고, 누군가는 놓친 것이 있을 거라고 생각했다. 그러나 자신이 틀리지 않았다고 장담할 수 있는 사람은 없었다.
+강태석은 그 혼란 한가운데 서 있었다. 아무도 그를 범인이라 부르지 않았지만 마음은 조금도 가벼워지지 않았다. 서연의 죽음을 안 날부터 그는 이미 다른 사람이 되어 있었다. 태움을 견딘 딸, 실험체가 된 딸, 죽은 뒤에도 기록에서 지워진 딸. 회장이 쓰러진 뒤에도 서연은 돌아오지 않았다. 어떤 복수도 그 사실을 바꾸지는 못했다.
+감염된 몸속에서 퍼져 가는 변화가 그에게도 분명히 느껴졌다. 그는 자기 손을 내려다보았다. 잃은 것을 되돌릴 수 없다는 건 처음부터 알고 있었다. 그렇다면 남은 삶은 무엇을 위해 쓸 것인가. 살아갈 이유였던 딸을 세상이 가져갔다면, 그 세상을 지키려 애쓸 이유도 없었다.
+총성이 울렸다.
+강태석은 바닥에 쓰러졌다. 마지막까지 그의 얼굴에는 누군가를 향한 원망이 남아 있었으나, 그 눈빛이 무엇을 뜻하는지는 아무도 알 수 없었다. 감염은 그와 함께 멈췄다.
+사람들은 한동안 움직이지 못했다. 한지훈은 총을 내려놓지 못했고, 임정숙은 쓰러진 환자의 얼굴에서 시선을 떼지 못했다. 그가 정말 회장을 죽인 사람이었는지, 무엇을 알고 있었는지, 이제 확인할 수 있는 것은 아무것도 없었다. 안도감 뒤로, 자신들이 무엇을 놓쳤는지 모른다는 불안이 남았다.
+병원을 떠나는 순간까지 그들은 회장의 죽음에 대한 답을 얻지 못했다. 서연에게 무슨 일이 있었는지 아는 사람도 여전히 많지 않았다. 그 밤에 끝난 것은 한 사람의 삶과 감염의 가능성뿐이었다. 진실이 끝난 것은 아니었다.`,
+
+                'H': `아무도 강태석의 이름을 부르지 않았다. 의심 어린 눈빛이 스쳐 갔을 뿐, 확신을 입 밖에 낼 만한 증거는 어디에도 없었다. 사람들은 서로의 말을 맞춰 보다 지쳤고, 새벽이 가까워서야 각자의 의자에 주저앉았다. 회장의 죽음은 미해결로 남았다.
+강태석은 마스크를 고쳐 쓰며 그 틈에 서 있었다. 몸속에서 무언가가 서서히 달아오르고 있었다. 그는 그것이 무엇인지 알았다. 자기 팔의 작은 상처가 그저 상처가 아니라는 것도. 복수는 끝났지만 서연은 돌아오지 않았다. 그는 이긴 것이 아니었다. 다만 돌아갈 곳이 없어졌을 뿐이었다.
+한 걸음만 내디디면 곁에 선 사람에게 닿을 거리였다. 세상이 딸에게 한 일을 세상에 그대로 돌려주고 싶은 마음은 여전히 그의 안에 있었다. 그러나 그는 서연이 간호사 가운을 입고 처음 출근하던 아침을 떠올렸다. 아픈 사람 곁에서 웃던 아이. 아버지가 사람을 해치는 것을 그 아이가 바랐을 리 없다는 생각이, 마지막 순간 그의 걸음을 붙들었다.
+그는 아무도 물지 않았다.
+동이 틀 무렵, 강태석은 매일 저녁 산책을 나서던 때처럼 조용히 병원 문을 나섰다. 누구도 그를 막지 않았다. 살인자와 감염자가 같은 사람이라는 사실을 아는 이 없이, 그는 아침 햇빛 속으로 걸어 들어갔다. 어디로 가야 할지는 알 수 없었다. 다만 사람이 없는 곳이어야 한다는 것만은 분명했다.
+그 밤이 지난 뒤에도 청화병원 사람들은 문득문득 그 환자의 뒷모습을 떠올렸다. 그가 누구였는지 끝내 알지 못한 채로.`,
+
+                'I': `아무도 강태석을 범인이라 단정하지 못했다. 의심 어린 눈빛은 있었으나 확신을 입 밖에 낼 만한 증거는 없었다. 사람들은 서로의 말을 맞춰 보며 진실에 다가가려 했지만, 그날 밤의 조각을 끝내 다 맞추지는 못했다. 그들이 놓친 것은 범인의 이름만이 아니었다. 그 이름 뒤에 숨어 있던, 한 사람의 무너진 삶이었다.
+강태석에게 윤서연은 세상 무엇과도 바꿀 수 없는 존재였다. 딸이 힘들어할 때면 그는 조금만 더 견디면 언젠가 그 아이가 편히 웃을 날이 오리라 믿었다. 그러나 서연은 괴롭힘 속에서 끝내 살아남지 못했다. 병원은 그 아이를 실험체로 쓰고 죽음의 진실을 감췄다. 그가 무너진 것은 딸이 죽었기 때문만이 아니었다. 그 아이가 겪은 고통이 아무 의미도 없는 것처럼 세상에서 지워졌기 때문이었다.
+회장을 죽이고도 되돌릴 수 있는 것은 아무것도 없었다. 서연은 여전히 없었고, 그 아이를 죽음으로 몰아넣은 세상은 여전히 건재했다. 그에게 남은 것은 그 세상을 향한 증오뿐이었다. 그는 자신을 바라보는 사람들의 눈에서 두려움을 읽었다. 돕고 싶어 하는 사람도, 그저 무사히 집에 돌아가고 싶은 사람도 있었을 것이다. 그러나 그는 그들에게서 지켜야 할 미래를 보지 못했다.
+강태석은 〔물린 사람〕에게 다가갔다. 상대는 그의 얼굴을 알아보고 뒷걸음질쳤다. 무슨 말을 하려 했는지는 중요하지 않았다. 그는 이미 자신의 선택을 알고 있었다. 그는 상대를 물었다. 거기에는 망설임도, 충동과 싸운 흔적도 없었다. 서연을 잃은 뒤 이 세상에 아무 애착도 남지 않았다는 사실을, 그는 행동으로 말했다.
+비명이 퍼졌다. 사람들은 흩어졌고, 누군가는 출구 쪽으로 달아났으며, 누군가는 물린 사람을 끌어내려 했다. 방금 전까지 회장의 죽음을 풀려 하던 이들이 이제는 제 목숨을 걱정해야 했다. 범인의 이름을 알아내지 못한 밤은, 살아남을 수 있을지조차 알 수 없는 밤으로 바뀌었다.
+그날 밤 사람들은 범인을 놓쳤다. 그러나 그들이 놓친 것은 정체만이 아니었다. 한 사람이 세상을 향한 믿음을 완전히 잃기까지 그 세상이 그에게 무엇을 했는지, 그들은 끝내 알지 못했다.`,
+
+                'J': `회장의 죽음은 끝내 누구의 손에서 비롯되었는지 밝혀지지 않았다. 사람들은 알고 있는 사실을 되짚으며 서로의 말을 의심했다. 조금 전까지 분명해 보이던 단서도 다른 사람의 설명을 듣고 나면 흔들렸다. 누군가는 범인을 놓쳤다는 생각에 괴로워했고, 누군가는 엉뚱한 사람을 의심했을지 모른다는 두려움에 말을 아꼈다. 진실을 밝혀야 한다는 마음은 여전히 남아 있었지만, 이제 그 마음만으로는 아무것도 확신할 수 없었다.
+강태석은 침묵했다. 그가 회장을 죽였다는 것을 아는 사람은 없었다. 그러나 그에게는 자신이 저지른 일보다 더 깊은 상실이 남아 있었다. 서연이 죽었다는 것, 그 아이가 태움에 시달리고 실험체로 쓰였다는 것, 그 죽음이 비밀리에 감춰졌다는 것. 복수를 했다고 딸을 구한 것은 아니라는 사실을 그는 알고 있었다. 회장의 죽음은 서연의 마지막 순간을 바꾸지 못했다. 다만 이제 자신도 돌아갈 수 없는 곳에 발을 들였다는 것을 확인시켜 줄 뿐이었다.
+감염자를 향한 총성이 울리자 모두가 몸을 움츠렸다. 감염자가 쓰러졌고, 잠시 뒤 아무 움직임도 없다는 것이 확인되었다. 감염이 더 번지지 않는다는 안도감이 찾아왔다. 사람들은 서로의 얼굴을 살폈고, 누군가는 울음을 터뜨렸다. 방금 전까지 죽을 수도 있다는 생각에 숨조차 제대로 쉬지 못했는데, 이제는 그 두려움에서 벗어날 수 있을 것 같았다.
+하지만 안도는 오래가지 않았다. 총을 쏜 한지훈은 자신에게 다른 선택이 있었는지를 생각했고, 그 장면을 지켜본 사람들은 한 생명이 끊어지는 일이 이토록 빠를 수 있다는 사실에 충격을 받았다. 감염자를 살려 두었다면 다른 사람이 물렸을지도 모른다. 죽이지 않았다면 더 나은 결말이 있었을지도 모른다. 아무도 그 가정을 확인할 수 없었다.
+그들은 살아남았다. 그러나 그 밤의 일은 누구에게도 쉽게 사라지지 않을 것이다. 회장의 죽음은 미해결로 남았고 강태석의 복수도 밝혀지지 않았다. 감염은 멈췄지만, 서로에게 품게 된 의심은 끝나지 않았다.
+청화병원을 떠나는 사람들은 뒤를 돌아보았다. 그곳에 두고 온 것은 죽은 사람들만이 아니었다. 자신이 무엇을 믿었고 누구를 의심했으며, 옳다고 여겼던 선택이 정말 옳았는지에 대한 질문도 함께 두고 떠나야 했다.`,
+
+                'K': `회장의 죽음은 미궁 속에 남았다. 사람들은 각자의 기억을 붙들고 밤새도록 서로의 말을 맞춰 보았지만, 누구도 모든 의문에 답하지 못했다. 의심은 끝나지 않았고, 자신이 놓친 단서가 있을지 모른다는 생각은 쉽게 사라지지 않았다. 한 사람의 죽음이 얼마나 많은 비밀을 품을 수 있는지 알게 되었지만, 그 비밀을 모두 밝혀낼 힘은 그들에게 없었다.
+강태석은 자신이 지목되지 않았다는 것을 확인하고도 안도하지 못했다. 회장을 죽인 일이 세상에서 사라지는 것은 아니었다. 서연의 죽음도 마찬가지였다. 태움을 견디다 실험체가 되어 죽은 딸, 그 사실을 숨긴 병원. 그는 그 진실을 안 뒤로 세상을 이전처럼 바라볼 수 없었다. 사랑한 아이가 겪은 고통을 아무도 책임지지 않는다면 무엇을 믿고 살아야 하는지 알 수 없었다.
+그때 감염자가 사람들 앞에 모습을 드러냈다. 그는 자기 몸에서 일어나는 변화를 두려워하고 있었다. 사람들은 그에게서 멀어졌고, 누군가는 당장 그를 죽여야 한다고 주장했다. 그 말이 틀렸다고 단정할 수는 없었다. 감염자가 살아 있는 한 누군가가 위험해질 가능성은 남아 있었다. 그러나 그는 아직 누구도 물지 않았다. 자신이 어떤 존재가 되어 가는지 알기에 누구보다 두려워하고 있었다.
+그는 도움을 청하려다 입을 다물었다. 사람들의 눈빛에서 자신이 이미 사람으로 받아들여지지 않는다는 것을 느꼈기 때문이다. 그래도 물러서지 않았다. 누군가를 다치게 하지 않겠다는 마음만은 놓고 싶지 않았다. 감염되었다는 사실이 자신이 살아온 시간까지 지워 버리지는 않는다고 믿고 싶었다.
+사람들은 쉽게 다가가지 못했다. 한 걸음 다가가면 한 걸음 물러서고, 손을 내밀었다가 다시 거두었다. 그 망설임 속에서 감염자는 혼자 남겨진 사람처럼 서 있었다. 그를 믿어도 되는지, 살려 두는 것이 옳은지 누구도 확답하지 못했다.
+결국 그 밤은 감염자가 살아 있는 채로 끝났다. 누군가는 그가 끝까지 버텨 주기를 바랐고, 누군가는 다음 순간에 무슨 일이 벌어질지 몰라 병원을 나선 뒤에도 몇 번이나 뒤를 돌아보았다. 안도하고 싶었지만 안도할 수 없었다. 누군가를 사람으로 대하려는 마음과 살아남아야 한다는 두려움이 서로 부딪히고 있었다.
+회장의 죽음은 여전히 풀리지 않았고, 강태석의 복수도 밝혀지지 않았다. 감염자는 아직 자신이 누구인지 잊지 않으려 애쓰고 있었다. 그 밤에 살아남은 사람들은 알게 되었다. 때로는 누군가를 죽이지 않는 선택보다, 그를 끝까지 사람으로 대하는 일이 더 어려울 수도 있다는 것을.`,
+
+                'L': `아무도 회장을 죽인 사람이 누구인지 확실히 말하지 못했다. 의심은 여러 사람 사이를 떠돌았고, 기억은 서로 어긋났다. 진실을 알고 싶은 마음이 간절할수록 사람들은 자신의 추측을 놓지 못했다. 누군가는 자신이 옳다고 믿었고, 누군가는 그 믿음이 무너질까 두려워 다른 사람의 말을 듣지 않았다. 결국 그들은 범인의 이름을 알아내지 못한 채 감염 사태를 마주해야 했다.
+강태석은 그 사이에서 아무 말도 하지 않았다. 자신이 회장을 죽였다는 것을 누구에게도 들키지 않았지만, 그 사실이 그에게 평온을 주지는 않았다. 서연이 살아 있던 시절, 그는 딸의 미래를 생각하며 하루를 버텼다. 그 아이가 힘들어도 언젠가 나아질 거라고 믿었다. 그러나 서연은 태움에 시달리다 실험체가 되어 죽었다. 병원은 그 죽음을 감췄고 세상은 아무 일 없다는 듯 흘러갔다. 그는 그 모든 것을 알게 된 뒤로 더는 세상이 나아질 거라고 믿지 않았다.
+감염자가 〔물린 사람〕을 물었을 때, 사람들은 비명을 지르며 흩어졌다. 물린 사람은 자신에게 무슨 일이 일어났는지 이해하려 애썼다. 조금 전까지 함께 살아남으려던 사람을 이제는 두려워해야 할지도 몰랐다. 감염자는 물린 사람을 놓아주고도 한동안 움직이지 못했다. 자신이 무엇을 했는지 알면서도, 벌어진 일을 되돌릴 수는 없었다.
+주변 사람들은 물린 사람에게 다가갈지 말지 망설였다. 그를 혼자 두는 것은 잔인한 일처럼 느껴졌지만, 가까이 가는 것도 두려웠다. 누군가는 감염자를 죽여야 한다고 외쳤고, 누군가는 아직 그럴 때가 아니라고 맞섰다. 서로를 설득하는 목소리는 점점 커졌지만, 앞으로 무슨 일이 벌어질지는 누구도 알지 못했다.
+물린 사람은 주변을 둘러보았다. 자신을 도우려는 얼굴과 자신을 피하려는 얼굴이 한눈에 들어왔다. 어느 쪽도 원망할 수 없었다. 두려움은 이해할 수 있었지만, 이제 자신이 누군가에게 두려움의 대상이 되었다는 사실은 견디기 어려웠다.
+그날 밤, 감염은 더 이상 병원 안의 문제가 아니었다. 사람들은 사랑하는 사람을 지키기 위해 무엇을 할 수 있는지 고민해야 했고, 누구를 믿을 수 있는지조차 확신하지 못했다. 회장의 죽음에 대한 진실은 어둠 속에 남았고, 그 어둠 속에서 또 다른 사람의 삶이 무너지고 있었다.`,
+
+                'M': `한지훈은 한참 동안 총을 내려다보았다. 손에 쥔 것은 차갑고 무거웠지만, 그가 감당해야 할 선택은 그보다 훨씬 무거웠다. 자신이 감염되었다는 사실을 안 뒤로 그는 사람들의 얼굴을 똑바로 바라보기 어려웠다. 조금 전까지 한 공간에서 숨 쉬고 이야기하던 사람들이 이제 자신에게서 멀어지고 있었다. 그 두려움이 이해되었기에 더 괴로웠다.
+강태석의 범행이 드러났을 때, 한지훈은 진실이 밝혀졌다는 안도보다 자신들이 얼마나 끔찍한 밤을 지나왔는지를 먼저 실감했다. 회장은 죽었고, 감염은 사람들의 목숨을 위협하고 있었다. 그가 살아남아 누군가를 물게 된다면, 자신이 사랑하고 아끼는 사람까지 이 공포 속으로 끌어들일 수 있었다. 아내와 일곱 살 딸 지유의 얼굴이 떠올랐다. 그 가능성만은 견딜 수 없었다.
+그는 총을 들어 자신을 겨눴다. 누군가 말리려 했지만 마음은 이미 기울어 있었다. 두려웠다. 죽고 싶지 않았다. 살아서 이 밤이 지나가는 것을 보고 싶었다. 그러나 살아남기 위해 다른 사람에게 위험을 넘기는 일은 하고 싶지 않았다. 두 마음이 가슴속에서 부딪혔고, 어느 쪽도 가볍지 않았다.
+총성이 울렸다.
+한지훈은 쓰러졌다. 누군가 그의 이름을 불렀고, 누군가는 달려와 그를 붙잡으려 했다. 그러나 그의 손은 이미 힘을 잃은 뒤였다. 마지막 순간 그가 무엇을 생각했는지 아무도 알 수 없었다. 살고 싶다는 마음이 있었을 것이다. 아직 해 보지 못한 일과 만나지 못한 사람들이 떠올랐을지도 모른다. 그 모든 것을 두고 떠나는 선택이 얼마나 두려웠을지도.
+그러나 한지훈의 죽음으로 감염은 멈췄다. 그는 누구도 물지 않았고, 누구도 그의 손에 감염되지 않았다. 살아남은 사람들은 그 사실에 안도하면서도 그가 남긴 빈자리를 바라보았다. 누군가는 그 선택이 옳았다고 말하려 했지만 끝내 입을 열지 못했다. 다른 사람을 지키기 위해 한 사람이 제 삶을 내놓아야 했다는 사실은, 쉽게 칭찬할 수 있는 일이 아니었다.
+강태석의 죄는 밝혀졌다. 그러나 한지훈의 죽음은 그 진실과 별개로 사람들의 마음에 남았다. 용기와 절망이 얼마나 가까이 붙어 있을 수 있는지, 그리고 어떤 선택은 살아남은 사람들에게 평생 지워지지 않는 질문을 남긴다는 것을 그 밤의 사람들은 알게 되었다.`,
+
+                'N': `강태석의 이름은 끝내 나오지 않았다. 사람들은 저마다 의심을 품었지만 누구도 그 의심을 확신으로 바꾸지 못했다. 회장의 죽음은 설명되지 않은 채 남았고, 그를 죽인 사람이 누구인지 알 수 없다는 사실이 살아남은 사람들의 마음을 무겁게 눌렀다. 그들은 진실을 밝혀야 한다고 생각하면서도, 자신들이 무엇을 놓쳤는지조차 알 수 없었다.
+한지훈은 그 혼란 속에서 자기 손을 내려다보았다. 감염되었다는 것을 안 순간부터 그는 자신이 더는 이전과 같은 사람이 아닐지도 모른다는 두려움에 사로잡혀 있었다. 아직 아무도 물지 않았지만, 앞으로도 그러리라 장담할 수는 없었다. 누군가에게 다가가는 것만으로 그 사람을 위험에 빠뜨릴 수 있다는 생각이 머릿속을 떠나지 않았다.
+그는 살아남고 싶었다. 그 마음만큼은 거짓이 아니었다. 아직 끝내지 못한 일이 있었고, 다시 평범한 아침을 맞고 싶었다. 그러나 그 평범한 아침이 다른 사람의 희생 위에 놓일 수 있다는 생각이 그를 놓아주지 않았다. 자신이 누군가를 물게 된다면 그 사람도 자신처럼 두려움에 떨게 될 것이다. 자신 때문에 누군가의 삶이 끝없는 공포로 바뀌는 일을 견딜 수 없었다.
+한지훈은 총을 들었다. 주변의 목소리가 멀어지는 듯했다. 누군가는 기다리라고 했고, 누군가는 그를 설득하려 했다. 하지만 그가 듣고 있는 것은 다른 사람들의 말이 아니라 마음속에서 되풀이되는 질문이었다. 정말 다른 방법은 없는 걸까. 조금만 더 버티면 달라질 수 있지 않을까. 자신이 죽지 않고도 다른 사람을 지킬 수는 없을까.
+그는 답을 찾지 못했다.
+총성이 울렸고 한지훈은 쓰러졌다. 사람들은 그에게 달려갔지만, 그가 남긴 선택을 되돌릴 수는 없었다. 감염은 그 자리에서 끝났다. 누구도 한지훈에게 물리지 않았고, 더는 감염이 일어나지 않았다.
+그 사실은 살아남은 사람들에게 안도감을 주었다. 그러나 그 안도감은 곧 죄책감으로 바뀌었다. 그들은 한지훈이 얼마나 두려웠는지, 얼마나 살고 싶었는지, 얼마나 누구도 해치고 싶지 않았는지를 뒤늦게 떠올렸다. 그가 마지막 순간 어떤 마음으로 방아쇠를 당겼는지 알 수 없다는 사실이 오히려 더 아팠다.
+회장의 죽음은 미해결로 남았다. 강태석은 아무도 모르는 곳에서 자신의 죄를 안은 채 살아남았고, 한지훈은 다른 사람을 지키기 위해 자기 삶을 끝냈다. 그 밤의 진실은 완전히 드러나지 않았지만, 한지훈의 선택만큼은 남은 사람들의 기억에서 쉽게 지워지지 않을 것이다.`,
+
+                'O': `강태석의 범행이 드러났을 때, 사람들은 오랫동안 자신들을 짓누르던 의문 하나를 마침내 내려놓을 수 있었다. 회장을 죽인 사람은 강태석이었다. 그러나 그 사실을 알아냈다고 밤이 끝난 것은 아니었다. 감염은 여전히 남아 있었고, 한지훈은 자신이 감염되었다는 사실을 더는 숨길 수 없었다. 그는 총을 쥔 손에 힘을 주었다. 누군가 말렸지만 그 말이 귀에 들어오지 않을 만큼 마음은 복잡했다.
+그는 두려웠다. 감염된 것보다 더 두려운 것은 자신이 앞으로 무엇을 할지 알 수 없다는 것이었다. 살아남고 싶었다. 그러나 살아남기 위해 누군가를 위험에 빠뜨리는 순간, 자신은 지금까지의 자신으로 남을 수 없을지도 몰랐다. 그럼에도 그는 방아쇠를 당겼다. 총성이 울렸고, 〔사살된 사람〕이 쓰러졌다.
+그 순간 한지훈은 자신이 무슨 선택을 했는지 깨달았다. 총을 쏜 이유는 설명할 수 있을지도 모른다. 자신을 지키기 위해서였다고, 다른 방법이 없었다고 말할 수도 있을 것이다. 그러나 어떤 설명도 쓰러진 사람을 다시 일으켜 세우지는 못했다. 손이 떨렸고 숨이 가빠졌다. 두려움과 원망, 믿을 수 없다는 표정이 한꺼번에 그를 향했다.
+그는 살아남았다. 그러나 살아남았다는 사실이 곧 구원을 뜻하지는 않았다. 그는 감염된 채였고, 이미 누군가에게 총을 쏜 사람이었다. 그 순간부터 그는 자신이 무엇을 할 수 있고 무엇을 할 수 없는지에 대해 더는 순진한 믿음을 가질 수 없었다.
+한지훈은 〔물린 사람〕에게 다가갔다. 상대는 그를 보고 뒷걸음질쳤다. 한지훈은 그 반응을 이해했다. 자신도 조금 전까지 다른 사람을 두려워했으니까. 하지만 이제는 그 두려움을 피할 수 없었다. 그는 상대를 물었다.
+비명이 터졌다. 사람들은 한지훈을 끌어내려 했고, 물린 사람은 고통과 공포 속에서 몸부림쳤다. 한지훈은 그 얼굴을 보며 자신이 저지른 일을 피할 수 없음을 알았다. 살아남기 위해 총을 쏜 선택과 감염된 채 사람을 문 행동은 이제 하나의 밤 안에 묶여 버렸다.
+강태석의 범행은 밝혀졌지만 그 진실이 사람들을 구해 주지는 못했다. 한지훈의 선택은 새로운 비극을 낳았다. 살아남은 사람들은 누가 적이고 누가 피해자인지 쉽게 구분할 수 없게 되었다. 그들이 알게 된 것은 단 하나였다. 살아남는다는 것은 때로 숨이 붙어 있다는 뜻일 뿐, 자신이 원했던 삶을 지켜 냈다는 뜻은 아니라는 것을.`,
+
+                'P': `회장의 죽음에 대한 의심은 끝내 정리되지 않았다. 사람들은 서로의 얼굴을 살피며 범인이 누구인지 추측했지만 누구도 확실한 답을 내놓지 못했다. 진실을 놓쳤다는 불안 속에서 감염 사태까지 마주해야 했다. 한지훈은 자신이 감염되었다는 것을 안 뒤로, 다른 사람들과 같은 자리에 서 있다는 것만으로도 죄책감을 느꼈다. 아직 아무도 물지 않았지만, 그가 감염되었다는 사실만으로 사람들은 그를 경계했다.
+그는 그 시선을 견디려 했다. 자신은 아직 누구도 해치지 않았고 앞으로도 그러지 않을 수 있다고 믿고 싶었다. 그러나 공포는 사람의 마음을 빠르게 바꿔 놓았다. 누군가의 작은 움직임에도 모두가 몸을 굳혔고, 다음 순간을 확신하는 사람은 없었다. 한지훈 역시 그 두려움에서 자유롭지 못했다. 살고 싶다는 마음과 다른 사람을 지켜야 한다는 마음 사이에서 그는 점점 더 좁은 곳으로 몰렸다.
+결국 총성이 울렸다.
+한지훈이 〔사살된 사람〕을 향해 방아쇠를 당긴 것이다. 그 행동은 순식간에 끝났지만 그가 그 선을 넘었다는 사실은 남았다. 쓰러진 사람을 바라보며 그는 숨 쉬는 것조차 어려워졌다. 살아남기 위한 선택이었다고 되뇌어도 그 말은 더는 그를 위로하지 못했다. 사람들은 그를 향해 소리쳤고, 누군가는 다가오려다 멈췄다. 그들의 눈에 비친 한지훈은 더 이상 그들이 알던 사람이 아니었다.
+그는 그 틈에서 살아남았다. 그러나 감염은 끝나지 않았다. 한지훈은 〔물린 사람〕에게 다가갔고, 상대가 물러서기도 전에 그를 물었다. 그 순간 주변의 모든 것이 무너졌다. 조금 전까지 서로를 지키려 애쓰던 사람들이 서로에게서 도망쳤다. 물린 사람은 비명을 질렀고, 한지훈을 막으려는 목소리들이 엉켜 들렸다.
+한지훈은 자신이 두려워하던 모습이 되어 가는 것을 느꼈을지도 모른다. 그러나 이미 저지른 선택은 되돌릴 수 없었다. 살고 싶다는 마음이 누군가의 삶을 망가뜨렸고, 그 결과는 또 다른 사람의 공포로 이어졌다.
+그날 밤, 회장의 죽음은 여전히 미해결로 남았다. 강태석은 자신의 죄를 감춘 채 살아남았고, 한지훈은 감염과 두려움 속에서 선을 넘어 버렸다. 살아남은 사람들은 서로를 바라보며 물었다. 자신이라면 달랐을까. 정말 다른 선택을 할 수 있었을까. 누구도 자신 있게 대답하지 못했다.`,
+
+                'Q': `강태석의 범행이 드러났을 때, 사람들은 진실을 찾았다는 안도와 그 진실이 남긴 충격 사이에서 말을 잃었다. 회장을 죽인 사람은 강태석이었다. 그러나 그가 왜 그런 선택을 했는지 알고 난 뒤에는 누구도 그를 단순한 악인이라 부르기 어려웠다. 딸은 태움에 시달리다 실험체가 되어 죽었고, 병원은 그 죽음마저 숨겼다. 강태석은 살아갈 이유였던 아이를 잃었다. 그 슬픔이 얼마나 깊었을지 상상할 수는 있었지만, 그가 저지른 살인을 대신 책임져 줄 수는 없었다.
+한지훈은 그 이야기를 듣는 동안 자신의 손을 꽉 쥐었다. 그 역시 감염되어 있었다. 말하는 순간 사람들의 눈빛이 달라지리라는 것을 알았다. 그들이 자신을 두려워하는 것은 당연했다. 그러나 그 두려움 속에서 어떤 사람이 될지만큼은 아직 선택할 수 있다고 믿고 싶었다.
+누군가 그에게 어서 총을 쏘라고 재촉했다. 위험을 끝내려면 그 방법밖에 없다고 주장하는 사람도 있었다. 한지훈은 총을 바라보았다. 살아남고 싶다는 마음은 분명했다. 그러나 그 총을 다른 사람에게 겨누는 순간, 지금껏 지켜 온 무언가가 무너질 것 같았다. 그는 끝내 방아쇠를 당기지 않았다.
+시간이 흐르는 동안 감염의 징후는 사라지지 않았다. 한지훈은 점점 더 두려워졌다. 자신의 몸이 자신을 배신할지도 모른다는 생각이 들었다. 누군가 가까이 다가오면 물러서고 싶었고, 누군가 손을 내밀면 그 손을 잡고 싶었다. 사람들을 위험에 빠뜨릴 수 있다는 걸 알면서도, 혼자 남겨지는 것이 무서웠다.
+그럼에도 한지훈은 아무도 물지 않았다. 쉬운 선택이 아니었다. 자신을 두려워하는 시선을 견디고, 살아남고 싶다는 마음을 억누르며, 누구도 다치게 하지 않겠다는 결심을 되풀이해 붙들어야 했다. 임정숙은 그에게서 말없이 거리를 지켰고, 그 침묵이 이상하게도 가장 큰 배려처럼 느껴졌다. 그가 끝까지 버틸 수 있을지는 아무도 알 수 없었다. 하지만 적어도 그 밤, 그는 자신의 두려움을 다른 사람에게 넘기지 않으려 애썼다.
+사람들은 그를 완전히 믿지 못했다. 그럴 수밖에 없었다. 누군가는 그가 병원을 나설 때까지 눈을 떼지 못했고, 누군가는 그가 아직 사람으로 남아 있다는 사실을 믿고 싶어 했다. 안도와 불안이 한지훈 곁에 나란히 머물렀다.
+강태석의 범행은 밝혀졌지만 감염은 해결되지 않았다. 살아남은 사람들은 끝나지 않은 위험 앞에서 서로를 지켜야 했다. 한지훈은 자신이 어떤 사람이 될 수 있는지 증명할 기회를 놓지 않았다. 그가 끝까지 버틸 수 있을지는 알 수 없었다. 그러나 그날 밤만큼은, 그는 자신이 두려워하는 존재가 되지 않기 위해 버텼다.`,
+
+                'R': `강태석의 범행이 밝혀졌을 때, 사람들은 마침내 회장의 죽음에 대한 답을 얻었다. 그러나 진실이 드러난 뒤에도 마음은 편해지지 않았다. 강태석은 딸을 잃었다. 서연은 태움에 시달리다 실험체가 되어 죽었고, 그 죽음마저 병원에 의해 감춰졌다. 강태석이 회장을 죽였다는 사실은 변하지 않았지만, 그가 왜 세상을 증오하게 되었는지 이해하려는 사람도 있었다. 그 이해가 용서를 뜻하지는 않았다. 다만 사람들은 한 사람의 죄 뒤에 또 다른 사람들의 죄가 숨어 있을 수 있다는 사실을 더는 외면할 수 없었다.
+한지훈은 그들의 대화를 듣고 있었다. 자신도 감염되었다는 것을 알기에 강태석의 이야기는 남의 일처럼 들리지 않았다. 누군가를 잃은 슬픔이 사람을 어디까지 몰아갈 수 있는지, 자신이 앞으로 어떤 모습이 될지 알 수 없다는 두려움이 얼마나 큰지, 그는 조금이나마 이해할 수 있었다. 그러나 이해한다고 해서 감염이 사라지지는 않았다.
+그는 총을 들지 않았다. 누구에게도 겨누고 싶지 않았다. 방아쇠를 당기면 그 순간은 끝날 수 있겠지만, 자신이 어떤 선택을 한 사람으로 남을지는 알 수 없었다. 그는 사람들을 둘러보았다. 자신을 도우려는 이도 있었고, 이미 자신을 위험한 존재로 여기는 이도 있었다. 한지훈은 그 시선들 사이에서 갈 곳을 찾지 못했다.
+시간이 흐를수록 두려움은 커졌다. 그는 자신이 언제까지 버틸 수 있을지 확신하지 못했다. 누군가 가까이 다가왔을 때, 한지훈은 잠시 그 사람의 얼굴을 바라보았다. 자신을 걱정하는 표정이었을지도 모른다. 그 얼굴을 기억하고 싶었지만 마음속의 공포는 점점 커져만 갔다.
+결국 한지훈은 〔물린 사람〕을 물었다.
+비명과 함께 모든 것이 달라졌다. 사람들은 달려들었고, 물린 사람은 자신에게 무슨 일이 일어난 것인지 이해하려 애썼다. 한지훈은 뒤로 물러났지만 이미 늦었다. 끝까지 버틸 수 있으리라 믿었던 마음은 무너졌고, 그가 가장 두려워했던 일이 현실이 되었다.
+그를 바라보는 눈빛이 달라졌다. 한지훈은 그 변화가 무엇을 뜻하는지 알았다. 그들은 더 이상 그를 믿을 수 없었고, 그 자신도 자신을 믿지 못하게 되었다. 누군가는 그를 죽여야 한다고 외쳤고, 누군가는 조금 전까지 그가 얼마나 버티려 애썼는지 기억해야 한다고 말했다. 그러나 물린 사람의 공포는 어떤 말로도 지워지지 않았다.
+강태석의 범행이 밝혀져도 감염은 여전히 사람들의 삶을 무너뜨리고 있었다. 한지훈은 두려움 속에서 자신이 원하지 않았던 결과를 만들었다. 그 밤의 비극은 한 사람의 악의만으로 설명되지 않았다. 그러나 그 사실이 상처 입은 사람들의 고통을 덜어 주지는 못했다.`,
+
+                'S': `회장의 죽음은 끝내 풀리지 않았다. 사람들은 서로의 말을 맞춰 보았지만 각자의 기억에는 빈틈이 남았다. 누군가는 자신이 범인을 알아냈다고 믿었고, 누군가는 그 확신이 너무 빠르다고 경고했다. 밤이 깊어질수록 진실은 가까워지는 듯하다가 다시 멀어졌다. 그들은 무엇을 놓쳤는지 알 수 없었고, 누구를 믿어야 할지도 확신하지 못했다.
+한지훈은 자신이 감염되었다는 것을 안 뒤로 그 혼란과는 다른 종류의 공포에 사로잡혔다. 회장의 죽음에 대한 진실을 찾는 일은 여전히 중요했지만, 이제 그는 자신이 살아남을 수 있을지부터 걱정해야 했다. 몸에 일어나는 변화를 느낄 때마다 가슴이 철렁 내려앉았다. 혹시 자신이 누군가를 물게 된다면, 그 사람은 어떤 마음으로 마지막 순간을 맞게 될까. 사랑하는 사람에게 그런 공포를 남기게 된다면 어떻게 해야 할까.
+그는 총을 바라보았다. 손에 쥐면 모든 것을 끝낼 수 있을지도 몰랐다. 그러나 한지훈은 방아쇠를 당기지 않았다. 죽고 싶어서가 아니었다. 오히려 살고 싶었다. 이 밤이 끝나고 다시 평범한 날을 맞고 싶었다. 자신이 감염되었다는 이유만으로 지금까지 살아온 삶을 포기하고 싶지 않았다.
+그는 다른 사람을 물지 않겠다고 마음먹었다. 그 약속은 누구에게도 확신을 줄 수 없었다. 사람들은 여전히 그를 경계했고, 한지훈 자신도 자기 몸과 마음을 완전히 믿을 수 없었다. 그래도 그는 한순간씩 버텼다. 두려움이 밀려올 때마다 숨을 고르고, 누군가 가까이 다가오면 거리를 두었다. 자신이 다른 사람에게 위험이 될 수 있다는 사실을 잊지 않으면서도, 아직 아무도 해치지 않았다는 사실을 붙들었다.
+그 밤이 지나갈 무렵 한지훈은 여전히 살아 있었다. 누구도 물지 않았고 누구에게도 총을 쏘지 않았다. 그 사실이 모든 것을 해결해 주지는 않았다. 감염은 남아 있었고 회장의 죽음도 미해결로 남았다. 하지만 그가 끝까지 지키려 했던 마음만큼은 그 밤에 완전히 사라지지 않았다.
+살아남은 사람들은 한지훈을 바라보며 서로 다른 감정을 느꼈다. 안도하는 사람도 있었고 여전히 두려워하는 사람도 있었다. 앞으로 무슨 일이 일어날지는 누구도 알 수 없었다. 한지훈 역시 마찬가지였다.
+그럼에도 그는 아직 선택할 수 있다고 믿고 싶었다. 감염되었다는 사실이 자신의 모든 것을 결정하지는 않는다고, 남은 시간이 얼마든 그 시간을 어떻게 보낼지는 아직 자신에게 달려 있다고. 그 믿음이 끝까지 이어질지는 알 수 없었지만, 그날 밤 그는 그것을 놓지 않았다.`,
+
+                'T': `회장의 죽음은 끝내 누구의 손에서 비롯되었는지 밝혀지지 않았다. 사람들은 서로를 의심하면서도 그 의심을 뒷받침할 확실한 답을 찾지 못했다. 누군가는 자신이 옳다고 믿었고, 누군가는 틀렸을지도 모른다는 생각에 괴로워했다. 그들은 진실을 알지 못한 채 밤을 지나야 했다. 그리고 그 밤에는 또 다른 비밀이 있었다. 한지훈은 감염되어 있었다.
+그는 자신이 감염되었다는 사실을 받아들이기 어려웠다. 살아남고 싶었다. 병원 문을 나서 다시 일상으로 돌아가고 싶었다. 자신이 누구인지 잊지 않고, 다른 사람들과 같은 세상에서 계속 살아가고 싶었다. 그러나 감염은 원한다고 사라지지 않았다. 몸에 나타나는 변화는 그를 끊임없이 두렵게 했고, 자신이 다른 사람에게 위험이 될 수 있다는 생각은 잠시도 마음을 놓지 못하게 했다.
+한지훈은 총을 들었다가 내려놓았다. 누군가를 쏘는 것으로 자신의 두려움을 끝내고 싶지 않았다. 그는 누구도 죽이지 않고 이 밤을 넘기고 싶었다. 그 마음은 진심이었다. 그는 스스로에게 약속했다. 다른 사람을 물지 않겠다고. 자신이 두려워하는 존재가 되지 않겠다고.
+그러나 시간이 흐를수록 약속을 지키기는 어려워졌다. 사람들은 그를 경계했고, 그가 다가가면 몸을 굳혔다. 한지훈은 그들의 두려움을 이해하면서도 외로웠다. 누군가의 손을 잡고 싶었고, 자신이 아직 혼자가 아니라는 사실을 확인하고 싶었다. 그러나 가까이 다가가려 할수록 사람들은 물러났다.
+마침내 한지훈은 〔물린 사람〕에게 다가갔다. 그 사람은 그를 알아보고 이름을 불렀다. 잠깐이나마 한지훈은 자신이 아직 이전의 자신으로 남을 수 있을 것 같았다. 그러나 그 순간은 오래가지 않았다. 그는 상대를 물었다.
+비명이 터졌다. 상대는 고통과 공포 속에서 몸부림쳤고, 사람들은 둘을 떼어 놓으려 달려들었다. 한지훈은 뒤로 물러났다. 자신이 무엇을 했는지 알았다. 끝까지 지키고 싶었던 약속이 무너졌다는 사실을, 그는 누구보다 먼저 깨달았다.
+그는 살아남았지만 그 생존은 그가 바라던 모습과 달랐다. 다른 사람을 해치지 않고 살아남고 싶었던 마음은 물린 사람의 상처와 주변 사람들의 공포 앞에서 무너져 있었다. 그가 얼마나 두려웠는지, 얼마나 버티려 했는지는 사라지지 않았지만, 그것이 피해자의 고통을 없애 주지는 않았다.
+회장의 죽음은 여전히 미해결이었다. 강태석은 자신의 죄를 숨긴 채 살아남았고, 한지훈은 끝내 지키지 못한 약속을 안고 서 있었다. 살아남은 사람들은 서로를 바라보며 알 수 없는 미래를 두려워했다. 누구도 자신이 다음 순간 어떤 선택을 하게 될지 장담할 수 없었다.
+그 밤이 남긴 가장 큰 공포는 감염 그 자체만이 아니었다. 끝까지 지키리라 믿었던 마음마저 절망과 두려움 앞에서 무너질 수 있다는 사실이었다.`,
+
+                'U': `강태석의 이름이 불렸을 때, 사람들은 긴 숨을 내쉬었다. 회장을 죽인 사람이 밝혀졌다. 딸 서연을 잃은 아버지의 이야기가 이어지는 동안 방 안에는 오래도록 무거운 침묵이 가라앉았다. 그러나 한지훈에게 그 진실은 먼 곳의 소리 같았다. 그의 앞에는 〔사살된 사람〕이 쓰러져 있었다.
+감염자를 가려내야 한다는 책임, 아직 아무도 물지 않았다는 사실, 그리고 자신이 바로 그 감염자라는 두려움. 그 사이에서 그는 방아쇠를 당겼다. 쏘아서는 안 되는 사람이었다. 그것을 그는 총성이 가라앉은 뒤에야 알았다. 가까이 있던 이들의 얼굴에는 두려움과 원망이 번져 있었다. 손은 떨렸고, 변명은 입 밖으로 나오지 않았다.
+그는 살아남았다. 그리고 감염은 그의 몸속에서 천천히 번지고 있었다. 누군가 가까이 다가와 무슨 말을 건넸지만 한지훈은 듣지 못했다. 그 사람의 목덜미를 바라보며, 자신이 방금 사람 하나를 죽였다는 사실과 이제 한 사람을 더 해칠 수 있다는 사실이 한꺼번에 밀려왔다. 지유의 얼굴이 떠올랐다. 그 아이에게 돌아갈 자격이 아직 남아 있을까.
+그는 뒤로 물러섰다. 입술을 깨물고, 벽에 등을 붙인 채 숨을 골랐다. 누구도 물지 않았다. 이미 한 번 선을 넘었지만, 두 번째 선만은 넘지 않았다.
+그러나 그 참음이 첫 번째 선을 지워 주지는 않았다. 쓰러진 사람은 일어나지 않았다. 사람들은 한지훈을 바라보았다. 그를 이해하려는 이도 있었고, 여전히 두려워하는 이도 있었다. 한지훈은 어느 쪽도 바라지 않았다. 다만 1년 전 자신이 삼켰던 침묵의 값이 마침내 이런 모양으로 돌아왔다는 것만은 알았다.
+강태석의 죄는 밝혀졌다. 그러나 그 진실이 드러난 밤에 또 한 사람의 죽음이 놓였다. 살아남은 사람들은 그 둘을 한꺼번에 안은 채 아침을 맞아야 했다.`,
+
+                'V': `회장의 죽음은 설명되지 않은 채 남았다. 사람들은 서로의 말을 맞추다 지쳐 가고 있었고, 누구도 자신의 추측을 끝까지 믿지 못했다. 이 밤에 일어난 일을 제대로 이해한 사람은 없었다. 오직 한지훈만이 자기 몸에서 일어나는 일을 알고 있었다.
+그는 〔사살된 사람〕을 쏘았다. 감염자를 가려내야 한다는 책임과 자신이 바로 그 감염자라는 두려움이 한꺼번에 방아쇠에 닿았다. 총성이 사라진 뒤에야 그는 쓰러진 사람이 감염자가 아니라는 것을 알았다. 숨을 쉴 수 없었다. 사람들의 시선이 쏟아졌지만 그는 아무 변명도 하지 못했다.
+시간이 흐르면서 감염은 한지훈의 몸을 조금씩 잠식해 갔다. 누군가 그를 부축하려 다가왔을 때 그는 손을 들어 막았다. 오지 마요. 목소리가 갈라졌다. 그는 이미 한 사람의 생명을 자기 손으로 끊었다. 두 번째를 만들 수는 없었다. 벽 쪽으로 물러나 입을 틀어막고, 이를 악물고, 지유의 이름을 속으로 되뇌며 그는 한순간씩 버텼다.
+그는 아무도 물지 않았다. 새벽이 올 때까지, 사람들이 하나둘 병원을 떠날 때까지.
+그러나 그 참음이 쓰러진 사람을 일으켜 주지는 않았다. 아무도 그의 선택을 칭찬하지 않았고, 그것은 마땅한 일이었다. 참아 낸 것은 더 많은 사람이 다치는 일을 막았을 뿐, 이미 죽은 사람을 되돌리지는 못했다. 한지훈은 자신이 지켜 낸 것과 잃어버린 것을 같은 무게로 안고 서 있었다.
+회장의 죽음은 미해결로 남았다. 강태석은 자신의 죄를 숨긴 채 아침을 맞았고, 한지훈은 사람으로 남은 채 사람을 죽인 자로 살아가야 했다. 그가 지킨 것도, 지키지 못한 것도 모두 그 밤의 진실이었다.`
+            };
+            return (rawTexts[code] || "엔딩 본문을 불러오는 중 오류가 발생했습니다.").split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        }
+    </script>
+</body>
+</html>
