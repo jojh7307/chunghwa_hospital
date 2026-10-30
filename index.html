@@ -363,7 +363,7 @@
             characters.forEach(char => {
                 // 사망자(사살된 감염자 / 오인사살된 사람 / 자결한 한지훈)도 '사후에 범인으로 지목'될 수 있다 (구속·경찰 없음)
                 const dead = (state.hanAction === '사살됨' && char === state.infected)
-                          || (state.hanAction === '타인사살' && char === state.shootTarget)
+                          || (state.hanAction === '타인사살' && state.infected !== '한지훈' && char === state.shootTarget)   // 한지훈 감염 경로는 지목·구속이 먼저이므로 사살 대상도 살아 있는 상태로 구속
                           || (state.hanAction === '자결' && char === '한지훈');
                 grid.innerHTML += `
                     <button onclick="setSuspect('${char}')" class="p-4 rounded-xl bg-hospital-800 border border-hospital-700 hover:border-red-600 hover:bg-hospital-700/50 transition text-left group">
@@ -543,7 +543,8 @@
         // 잘못 구속된 경우, 첫 문단에서 '범인을 못 가렸다'는 표현이 구속 장면과 충돌하지 않도록 바꿀 문장
         const OPENER_WRONG = {
             G: [["그러나 자신이 틀리지 않았다고 장담할 수 있는 사람은 없었다.", "그러나 자신이 틀리지 않았다고 장담할 수 있는 사람은 없었다. 그럼에도 결론은 내려야 했고, 표는 한 사람에게 모였다."]],
-            H: [["한참 만에야 각자의 의자에 주저앉았다. 회장의 죽음은 끝난 것으로 처리되었다.", "한참 만에야 사람들은 가장 의심이 쏠린 한 사람의 이름을 입에 올렸다."]],
+            H: [["한참 만에야 각자의 의자에 주저앉았다. 회장의 죽음은 끝난 것으로 처리되었다.", "한참 만에야 사람들은 가장 의심이 쏠린 한 사람의 이름을 입에 올렸다."],
+                ["한참 만에야 각자의 의자에 주저앉았다. 회장의 죽음은 미해결로 남았다.", "한참 만에야 사람들은 가장 의심이 쏠린 한 사람의 이름을 입에 올렸다."]],
             I: [["그날 밤의 조각을 끝내 다 맞추지는 못했다.", "그날 밤의 조각을 끝내 다 맞추지 못한 채 표는 한 사람에게 쏠렸다."]],
             J: [["회장의 죽음은 끝내 누구의 손에서 비롯되었는지 밝혀지지 않았다.", "회장의 죽음이 누구의 손에서 비롯되었는지 끝내 확신하는 사람은 없었다."],
                 ["이제 그 마음만으로는 아무것도 확신할 수 없었다.", "이제 그 마음만으로는 아무것도 확신할 수 없었다. 그럼에도 표는 한 사람에게 모였다."]],
@@ -558,6 +559,14 @@
         // R: 한지훈이 구속자이고 총을 쏘는 경우 — 구속 시도 → 뿌리치고 사살 → 모두 충격
         function buildHanBreakout() {
             const inf = state.infected;
+            if (inf === '한지훈') {
+                // 감염자 = 구속자 = 한지훈: 지목 → 뿌리치고 오인사살 → 경찰이 와서 구속 → 경찰차 안에서 경찰관을 문다
+                const b = getHanBreakoutAlive().slice(0, 8);
+                b[6] = b[6].replace('총에는 더 이상 남은 총알이 없었다.', '총에는 더 이상 남은 총알이 없었다. 한지훈의 소매 아래로 번진 붉은 발진을 아는 사람은 아직 아무도 없었다.');
+                const police = getHanPoliceText('물음');
+                police[0] = '얼마 지나지 않아 경찰이 도착했다. 한지훈은 총을 빼앗긴 채 쓰러진 {사살된 사람}의 곁에 붙들려 있었고, 손목에 수갑이 채워지는 동안에도 더는 저항하지 않았다.';
+                return { code: 'R', title: TITLES.R, group: 'Ⅲ군 · 감염자가 한지훈인 경우', paras: [...b, ...police], officerBitten: true };
+            }
             const killedInfected = (state.hanAction === '사살됨');
             const victim = killedInfected ? '{감염자}' : '{사살된 사람}';
             const targetT = (!killedInfected && state.shootTarget === '강태석');
@@ -585,7 +594,7 @@
         function isDeadSuspect() {
             const sp = state.suspect;
             return (state.hanAction === '사살됨' && sp === state.infected)
-                || (state.hanAction === '타인사살' && sp === state.shootTarget)
+                || (state.hanAction === '타인사살' && state.infected !== '한지훈' && sp === state.shootTarget)
                 || (state.hanAction === '자결' && sp === '한지훈');
         }
 
@@ -617,11 +626,13 @@
                 const closing = code === 'E'
                     ? `강태석의 범행은 밝혀졌지만, 가려내야 했던 것은 그 하나만이 아니었다. ${tail}`
                     : `${dead ? '회장의 죽음은 쓰러진 {사살된 사람}의 이름으로 닫혔고' : '회장의 죽음은 여전히 풀리지 않았고'}, 강태석의 복수는 끝내 밝혀지지 않았다. ${tail}`;
-                // 버티는 동안 죽은 사람에게 죄를 얹는 말이 오간다 (죽은 사람이 지목된 경우)
-                block = [...getWrongShotInfected(name, '참음'), ...(dead ? getDeadBlameText() : []), closing];
+                // 총격 직후, 감염자가 움직이기 전에 죽은 사람에게 죄를 얹는 말이 먼저 오간다 (죽은 사람이 지목된 경우)
+                const hold = getWrongShotInfected(name, '참음');
+                if (dead) hold[0] = hold[0].replace('끝났느냐는 물음에 아무도 답하지 못하는 사이,', '사람들이 죽은 사람에게 죄를 얹느라 정신이 팔린 사이,');
+                block = [...(dead ? getDeadBlameText() : []), ...hold, closing];
             } else {
-                // 광란이 가라앉은 뒤 죽은 사람에게 죄를 얹는 말이 오간다 (죽은 사람이 지목된 경우)
-                block = [...getWrongShotInfected(name, '물음'), ...(dead ? getDeadBlameText() : [])];
+                // 물기 전에, 총격 직후 먼저 죽은 사람에게 죄를 얹는 말이 오간다 (죽은 사람이 지목된 경우)
+                block = [...(dead ? getDeadBlameText() : []), ...getWrongShotInfected(name, '물음')];
             }
             paras.splice(start, count, ...block);
             return start;
@@ -763,7 +774,7 @@
                     }
                 } else {
                     // 구속 → 오인사살 → (죽은 사람 지목) → 감염자의 결말(참음/물음) 순서로, 감염자 장면보다 앞에 삽입
-                    const n2 = wrong ? (hanArrested && shotWrong ? insertAt(paras, 1, getHanBreakoutAlive()) : addAppendixC3(paras, 1, false, hanArrested)) : 0;   // 첫 문단 바로 뒤에 구속 장면
+                    const n2 = wrong ? (hanArrested && shotWrong ? insertAt(paras, state.shootTarget === '강태석' ? 2 : 1, getHanBreakoutAlive()) : addAppendixC3(paras, 1, false, hanArrested)) : 0;   // 첫 문단 바로 뒤에 구속 장면 (강태석이 오인사살되면 그가 살아 있는 문단 뒤)
                     if (shotWrong && !hanArrested) {
                         const at = anchor2 >= 0 ? anchor2 + n2 : undefined;
                         addAppendixC1(paras, state.shootTarget === '강태석', at, false);   // (죽은 사람 지목 장면은 감염자 장면 안에 포함됨)
